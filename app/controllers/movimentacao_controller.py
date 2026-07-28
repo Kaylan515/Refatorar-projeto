@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.movimentacao import Movimentacao, Tipo_de_movimentacao as TipoMovimentacao
-from app.models.produto import Produto
+from app.models.produto import Produto, ProdutoVariacao
 from app.auth import get_usuario_logado, get_admin
 
 router = APIRouter(prefix="/movimentacoes", tags=["Movimentações"])
@@ -97,24 +97,21 @@ def form_nova_movimentacao(
 @router.post("/nova")
 def registrar_movimentacao(
     request: Request,
-    produto_id: int     = Form(...),
-    tipo: str           = Form(...),
-    quantidade: int     = Form(...),
-    preco_unitario: float = Form(...),
-    observacao: str     = Form(""),
-    db: Session         = Depends(get_db),
-    usuario             = Depends(get_usuario_logado)
+    produto_id: int           = Form(...),
+    produto_variacao_id: int  = Form(0),
+    tipo: str                 = Form(...),
+    quantidade: int           = Form(...),
+    preco_unitario: float     = Form(...),
+    observacao: str           = Form(""),
+    db: Session               = Depends(get_db),
+    usuario                   = Depends(get_usuario_logado)
 ):
     """
-    Registra a movimentação e atualiza o estoque do produto
-    em uma única transação — garante consistência.
-
-    Se qualquer operação falhar, o rollback desfaz tudo:
-    nem a movimentação é salva nem o estoque é alterado.
+    Registra a movimentação de uma variação de produto e atualiza
+    o estoque da variação em uma única transação.
     """
     produtos = db.query(Produto).filter(Produto.ativo == True).all()
 
-    # Valida se o tipo enviado é válido
     if tipo not in (TipoMovimentacao.ENTRADA, TipoMovimentacao.SAIDA):
         return templates.TemplateResponse(
             request,
@@ -145,18 +142,49 @@ def registrar_movimentacao(
             status_code=400
         )
 
-    # Busca o produto com lock para evitar race condition:
-    # se dois usuários registrarem saída ao mesmo tempo,
-    # with_for_update() garante que um espera o outro terminar.
-    produto = db.query(Produto).filter(
-        Produto.id == produto_id
-    ).with_for_update().first()
-
+    produto = db.query(Produto).filter(Produto.id == produto_id).first()
     if not produto:
         return RedirectResponse(url="/movimentacoes/nova", status_code=302)
 
-    # Impede saída maior que o estoque disponível
-    if tipo == TipoMovimentacao.SAIDA and quantidade > produto.estoque_atual:
+    variacao = None
+    if produto_variacao_id:
+        variacao = db.query(ProdutoVariacao).filter(
+            ProdutoVariacao.id == produto_variacao_id,
+            ProdutoVariacao.produto_id == produto_id
+        ).with_for_update().first()
+
+        if not variacao:
+            return templates.TemplateResponse(
+                request,
+                "movimentacoes/form.html",
+                {
+                    "request":    request,
+                    "usuario":    usuario,
+                    "produtos":   produtos,
+                    "produto_id": produto_id,
+                    "tipos":      TipoMovimentacao,
+                    "erro":       "Variação de produto inválida.",
+                },
+                status_code=400
+            )
+    else:
+        variacao = next((v for v in produto.variacoes if v.ativo), None)
+        if not variacao:
+            return templates.TemplateResponse(
+                request,
+                "movimentacoes/form.html",
+                {
+                    "request":    request,
+                    "usuario":    usuario,
+                    "produtos":   produtos,
+                    "produto_id": produto_id,
+                    "tipos":      TipoMovimentacao,
+                    "erro":       "Nenhuma variação ativa disponível.",
+                },
+                status_code=400
+            )
+
+    if tipo == TipoMovimentacao.SAIDA and quantidade > variacao.estoque_atual:
         return templates.TemplateResponse(
             request,
             "movimentacoes/form.html",
@@ -168,34 +196,29 @@ def registrar_movimentacao(
                 "tipos":      TipoMovimentacao,
                 "erro": (
                     f"Estoque insuficiente. "
-                    f"Disponível: {produto.estoque_atual} unidade(s)."
+                    f"Disponível: {variacao.estoque_atual} unidade(s)."
                 ),
             },
             status_code=400
         )
 
-    # ----------------------------------------------------------
-    # Atualiza o estoque do produto
-    # ----------------------------------------------------------
     if tipo == TipoMovimentacao.ENTRADA:
-        produto.estoque_atual += quantidade
+        variacao.estoque_atual += quantidade
     else:
-        produto.estoque_atual -= quantidade
+        variacao.estoque_atual -= quantidade
 
-    # ----------------------------------------------------------
-    # Registra a movimentação no histórico
-    # ----------------------------------------------------------
     movimentacao = Movimentacao(
-        tipo           = tipo,
-        quantidade     = quantidade,
-        preco_unitario = preco_unitario,
-        observacao     = observacao or None,
-        produto_id     = produto_id,
-        usuario_id     = usuario.get("id"),
+        tipo                   = tipo,
+        quantidade             = quantidade,
+        preco_unitario         = preco_unitario,
+        observacao             = observacao or None,
+        produto_id             = produto_id,
+        produto_variacao_id    = variacao.id,
+        usuario_id             = usuario.get("id"),
     )
 
     db.add(movimentacao)
-    db.commit()  # salva produto (estoque) + movimentação juntos
+    db.commit()
 
     return RedirectResponse(
         url=f"/produtos/{produto_id}?movimentacao=ok",
