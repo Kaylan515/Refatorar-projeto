@@ -5,7 +5,11 @@ from app.models import movimentacao
 from app.models import cliente
 from app.models import venda
 
-#Gerar a migration
-#python -m alembic revision --autogenerate -m "Criar tabela movimentacao"
+# Importar ProdutoVariacao para registro no banco
+from app.models.produto import ProdutoVariacao
 
-#python -m alembic upgrade head
+# Gerar a migration:
+# python -m alembic revision --autogenerate -m "Adicionar suporte a variações de produtos"
+
+# Aplicar migração:
+# python -m alembic upgrade head
