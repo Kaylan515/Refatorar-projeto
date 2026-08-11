@@ -1,14 +1,16 @@
+# ============================================================
 # controllers/produto_controller.py — CRUD produtos AAPM SENAI
+# ============================================================
+
 import os
 import shutil
-import uuid
 from fastapi import APIRouter, Depends, Request, Form, UploadFile, File, status
-from fastapi.responses import RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models.produto import Produto, ProdutoVariacao
+from app.models.produto import Produto
 from app.models.categoria import Categoria
 from app.auth import get_usuario_logado, get_admin
 
@@ -88,8 +90,6 @@ async def criar_produto(
     nome: str          = Form(...),
     preco: float       = Form(...),
     estoque_atual: int = Form(...),
-    cor: str           = Form(""),
-    tamanho: str       = Form(""),
     categoria_id: int  = Form(0),   # 0 = sem categoria
     imagem: UploadFile = File(None), # None = campo opcional
     db: Session        = Depends(get_db),
@@ -98,6 +98,7 @@ async def criar_produto(
     categorias = db.query(Categoria).filter(Categoria.ativo == True).all()
 
     # Verifica duplicidade de nome
+    # ilike() para comparação case-insensitive, evitando produtos "Camiseta" e "camiseta".
     if db.query(Produto).filter(Produto.nome.ilike(nome)).first():
         return templates.TemplateResponse(
             request,
@@ -108,44 +109,34 @@ async def criar_produto(
                 "editando":   None,
                 "categorias": categorias,
                 "erro":       "Já existe um produto com este nome.",
-                "valores":    {
-                    "nome": nome,
-                    "preco": preco,
-                    "estoque_atual": estoque_atual,
-                    "cor": cor,
-                    "tamanho": tamanho,
-                    "categoria_id": categoria_id
-                }
+                "valores":    {"nome": nome, "preco": preco,
+                               "estoque_atual": estoque_atual,
+                               "categoria_id": categoria_id}
             },
             status_code=400
         )
 
+    # Processa o upload da imagem
     imagem_path = await _salvar_imagem(imagem)
 
     produto = Produto(
-        nome         = nome,
-        categoria_id = categoria_id or None,
-        imagem_path  = imagem_path,
+        nome          = nome,
+        preco         = preco,
+        estoque_atual = estoque_atual,
+        categoria_id  = categoria_id or None,  # 0 vira NULL no banco
+        imagem_path   = imagem_path,
     )
 
     db.add(produto)
-    db.flush()
-
-    variacao = ProdutoVariacao(
-        produto_id    = produto.id,
-        cor           = cor or None,
-        tamanho       = tamanho or None,
-        preco         = preco,
-        estoque_atual = estoque_atual,
-    )
-
-    db.add(variacao)
     db.commit()
 
     return RedirectResponse(url="/produtos?criado=ok", status_code=302)
 
 
+# ============================================================
 # DETALHE
+# ============================================================
+
 @router.get("/{produto_id}")
 def detalhe_produto(
     produto_id: int,
@@ -168,8 +159,10 @@ def detalhe_produto(
     )
 
 
-
+# ============================================================
 # EDIÇÃO
+# ============================================================
+
 @router.get("/{produto_id}/editar")
 def form_editar_produto(
     produto_id: int,
@@ -202,8 +195,6 @@ async def editar_produto(
     nome: str          = Form(...),
     preco: float       = Form(...),
     estoque_atual: int = Form(...),
-    cor: str           = Form(""),
-    tamanho: str       = Form(""),
     categoria_id: int  = Form(0),
     imagem: UploadFile = File(None),
     db: Session        = Depends(get_db),
@@ -215,6 +206,7 @@ async def editar_produto(
     if not editando:
         return RedirectResponse(url="/produtos", status_code=302)
 
+    # Verifica conflito de nome com outro produto
     conflito = db.query(Produto).filter(
         Produto.nome.ilike(nome),
         Produto.id != produto_id
@@ -234,29 +226,17 @@ async def editar_produto(
             status_code=400
         )
 
+    # Processa nova imagem — só substitui se um arquivo foi enviado
     nova_imagem_path = await _salvar_imagem(imagem)
     if nova_imagem_path:
+        # Remove a imagem antiga do disco para não acumular arquivos
         _remover_imagem(editando.imagem_path)
         editando.imagem_path = nova_imagem_path
 
-    editando.nome         = nome
-    editando.categoria_id = categoria_id or None
-
-    variacao = next((v for v in editando.variacoes if v.ativo), None)
-    if variacao is None:
-        variacao = ProdutoVariacao(
-            produto_id    = editando.id,
-            cor           = cor or None,
-            tamanho       = tamanho or None,
-            preco         = preco,
-            estoque_atual = estoque_atual,
-        )
-        db.add(variacao)
-    else:
-        variacao.cor           = cor or None
-        variacao.tamanho       = tamanho or None
-        variacao.preco         = preco
-        variacao.estoque_atual = estoque_atual
+    editando.nome          = nome
+    editando.preco         = preco
+    editando.estoque_atual = estoque_atual
+    editando.categoria_id  = categoria_id or None
 
     db.commit()
 
@@ -286,7 +266,7 @@ def desativar_produto(
 # FUNÇÕES AUXILIARES DE IMAGEM
 # ============================================================
 
-async def _salvar_imagem(imagem: UploadFile | None):
+async def _salvar_imagem(imagem: UploadFile | None) -> str | None:
     """
     Salva o arquivo enviado em /static/uploads/ e retorna
     o path relativo para guardar no banco.
@@ -307,8 +287,7 @@ async def _salvar_imagem(imagem: UploadFile | None):
 
     # Garante nome de arquivo único usando o nome original
     # Em produção: use uuid4() para evitar colisões e exposição de nomes
-    # nome_arquivo = f"{imagem.filename}"
-    nome_arquivo = f"{uuid.uuid4()}{ext}"
+    nome_arquivo = f"{imagem.filename}"
     caminho_completo = os.path.join(UPLOAD_DIR, nome_arquivo)
 
     # Salva o arquivo no disco
