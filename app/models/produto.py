@@ -1,32 +1,28 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from app.database import Base
-from app.models.categoria import Categoria
 
 class Produto(Base):
     __tablename__ = "produtos"
 
-    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
-    nome = Column(String(200), nullable=False, index=True)
-    estoque_atual = Column(Integer, nullable=False, default=0)
-    preco = Column(Integer, nullable=False, default=0.0)
+    id = Column(Integer, primary_key=True, index=True)
+    nome = Column(String, unique=True, nullable=False)
+    categoria_id = Column(Integer, ForeignKey("categorias.id"))
+    imagem_path = Column(String, nullable=True)
     ativo = Column(Boolean, default=True)
 
-    #caminho da imagem do produto, pode ser um URL ou caminho local
-    imagem_path = Column(String(255), nullable=True)
-
-    #Relacionamento com categoria
-    categoria_id = Column(Integer, ForeignKey("categorias.id", ondelete="SET NULL"), nullable=True)
-    categoria = relationship("Categoria", back_populates="produtos")
+    variacoes = relationship("ProdutoVariacao", back_populates="produto")
 
 
-    #Método
-    @property
-    def imagem_url(self):
-        if self.imagem_path:
-            return f"/static/{self.imagem_path}"
-        else:
-            return "/static/imagens/default.png"  # Caminho para imagem padrão caso não haja imagem específica
-        
+class ProdutoVariacao(Base):
+    __tablename__ = "produto_variacoes"
 
-    
+    id = Column(Integer, primary_key=True, index=True)
+    produto_id = Column(Integer, ForeignKey("produtos.id"), nullable=False)
+    cor = Column(String, nullable=True)
+    tamanho = Column(String, nullable=True)
+    preco = Column(Float, nullable=False)
+    estoque_atual = Column(Integer, default=0)
+    ativo = Column(Boolean, default=True)
+
+    produto = relationship("Produto", back_populates="variacoes")
