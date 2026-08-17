@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.venda import Venda, ItemVenda
-from app.models.produto import Produto, ProdutoVariacao
+from app.models.produto import Produto
 from app.models.cliente import Cliente
 from app.auth import get_usuario_logado
 
@@ -38,7 +38,7 @@ def tela_pdv(
     """
     produtos  = (
         db.query(Produto)
-        .filter(Produto.ativo == True)
+        .filter(Produto.ativo == True, Produto.estoque_atual > 0)
         .order_by(Produto.nome)
         .all()
     )
@@ -72,12 +72,12 @@ def finalizar_venda(
     usuario            = Depends(get_usuario_logado)
 ):
     """
-    Recebe o carrinho como JSON e persiste a venda por variação.
-    
+    Recebe o carrinho como JSON, valida e persiste a venda.
+
     Formato esperado do carrinho_json:
     [
-        {"produto_variacao_id": 1, "nome": "Camiseta - Azul/P", "preco": 50.00, "quantidade": 2},
-        {"produto_variacao_id": 2, "nome": "Calça - Preto/M", "preco": 80.00, "quantidade": 1}
+        {"produto_id": 1, "nome": "Caneta", "preco": 2.50, "quantidade": 3},
+        {"produto_id": 2, "nome": "Caderno", "preco": 15.00, "quantidade": 1}
     ]
     """
     try:
@@ -88,6 +88,7 @@ def finalizar_venda(
     if not itens:
         return RedirectResponse(url="/pdv?erro=vazio", status_code=302)
 
+    # Busca o cliente e verifica se é associado
     cliente             = None
     desconto_percentual = 0.0
 
@@ -100,23 +101,19 @@ def finalizar_venda(
         if cliente and cliente.is_associado:
             desconto_percentual = DESCONTO_ASSOCIADO
 
+    # ── Valida estoque e calcula totais ──────────────────────
     total_bruto = 0.0
     itens_validados = []
 
     for item in itens:
-        produto_variacao_id = int(item.get("produto_variacao_id", 0))
-        
-        if produto_variacao_id <= 0:
-            return RedirectResponse(url="/pdv?erro=variacao_invalida", status_code=302)
-
-        variacao = db.query(ProdutoVariacao).filter(
-            ProdutoVariacao.id == produto_variacao_id,
-            ProdutoVariacao.ativo == True
+        produto = db.query(Produto).filter(
+            Produto.id == item["produto_id"],
+            Produto.ativo == True
         ).with_for_update().first()
 
-        if not variacao:
+        if not produto:
             return RedirectResponse(
-                url=f"/pdv?erro=variacao_inexistente&id={produto_variacao_id}",
+                url=f"/pdv?erro=produto_inexistente&id={item['produto_id']}",
                 status_code=302
             )
 
@@ -125,26 +122,27 @@ def finalizar_venda(
         if qtd <= 0:
             return RedirectResponse(url="/pdv?erro=quantidade", status_code=302)
 
-        if variacao.estoque_atual < qtd:
+        if produto.estoque_atual < qtd:
             return RedirectResponse(
-                url=f"/pdv?erro=estoque&produto={variacao.nome_completo}",
+                url=f"/pdv?erro=estoque&produto={produto.nome}",
                 status_code=302
             )
 
-        subtotal    = variacao.preco * qtd
+        subtotal    = produto.preco * qtd
         total_bruto += subtotal
 
         itens_validados.append({
-            "variacao":       variacao,
-            "quantidade":     qtd,
-            "preco":          variacao.preco,
-            "produto_nome":   variacao.produto.nome,
-            "variacao_desc":  variacao.descricao,
+            "produto":       produto,
+            "quantidade":    qtd,
+            "preco":         produto.preco,
+            "produto_nome":  produto.nome,
         })
 
+    # ── Calcula desconto e total final 
     desconto_valor = total_bruto * (desconto_percentual / 100)
     total_liquido  = total_bruto - desconto_valor
 
+    # ── Persiste tudo em uma única transação
     venda = Venda(
         cliente_id          = cliente_id or None,
         usuario_id          = usuario.get("id"),
@@ -154,19 +152,18 @@ def finalizar_venda(
         observacao          = observacao or None,
     )
     db.add(venda)
-    db.flush()
+    db.flush()  # gera o venda.id sem commitar ainda
 
     for item in itens_validados:
         db.add(ItemVenda(
-            venda_id                = venda.id,
-            produto_id              = item["variacao"].produto_id,
-            produto_variacao_id     = item["variacao"].id,
-            produto_nome            = item["produto_nome"],
-            produto_variacao_descricao = item["variacao_desc"],
-            quantidade              = item["quantidade"],
-            preco_unitario          = item["preco"],
+            venda_id       = venda.id,
+            produto_id     = item["produto"].id,
+            produto_nome   = item["produto_nome"],
+            quantidade     = item["quantidade"],
+            preco_unitario = item["preco"],
         ))
-        item["variacao"].estoque_atual -= item["quantidade"]
+        # Baixa o estoque do produto
+        item["produto"].estoque_atual -= item["quantidade"]
 
     db.commit()
 

@@ -6,7 +6,6 @@ from app.models import cliente
 from app.models import venda
 
 # Importar ProdutoVariacao para registro no banco
-from app.models.produto import ProdutoVariacao
 
 # Gerar a migration:
 # python -m alembic revision --autogenerate -m "Adicionar suporte a variações de produtos"

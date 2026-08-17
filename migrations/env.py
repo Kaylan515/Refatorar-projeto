@@ -7,16 +7,23 @@ from alembic import context
 
 from dotenv import load_dotenv
 import os
-from app.database import Base
-from app.models import usuario
 
+# Importamos nossa Base — ela conhece todos os Models registrados
+from app.database import Base
+
+# Importante: importar os models para que o Alembic os enxergue
+# Sem este import, o Alembic não saberá que a tabela existe
+from app.models import usuario  # noqa: F401
+
+load_dotenv()
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
-load_dotenv()
 
+# Injeta a DATABASE_URL do .env no Alembic dinamicamente
+# Isso evita duplicar a URL em dois lugares (alembic.ini e .env)
 config.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL"))
 
 # Interpret the config file for Python logging.

@@ -1,4 +1,11 @@
-from fastapi import APIRouter, Request, Depends, Form, status
+# ============================================================
+# controllers/auth_controller.py — Rotas de autenticação
+# ============================================================
+# Um controller no padrão MVC contém as rotas (endpoints)
+# e a lógica que conecta o Model ao template (View).
+# ============================================================
+
+from fastapi import APIRouter, Depends, Request, Form, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
@@ -7,86 +14,143 @@ from app.database import get_db
 from app.models.usuario import Usuario
 from app.auth import hash_senha, verificar_senha, criar_token
 
+# APIRouter agrupa as rotas deste módulo com o prefixo /auth
 router = APIRouter(prefix="/auth", tags=["Autenticação"])
 
 templates = Jinja2Templates(directory="app/templates")
 
-#Rota de cadastro
-@router.get("/cadastro")
-def tela_cadastro(request: Request):
+
+# ============================================================
+# REGISTRO
+# ============================================================
+
+@router.get("/register")
+def pagina_registro(request: Request):
+    """Exibe o formulário de cadastro."""
     return templates.TemplateResponse(
         request,
-        "auth/cadastro.html",
-        {"request": request})
+        "auth/register.html",
+        {"request": request}
+    )
 
-@router.get("/login")
-def tela_login(request: Request):
-    return templates.TemplateResponse(
-        request,
-        "auth/login.html",
-        {"request": request})
 
-# Criar o usuario no banco
-@router.post("/cadastro")
-def cadastrar_user(
+@router.post("/register")
+def registrar(
     request: Request,
     nome: str = Form(...),
     email: str = Form(...),
     senha: str = Form(...),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db)
 ):
-    #Verificar se o email está cadatrado
-    user_existente = db.query(Usuario).filter_by(email=email).first()
-    if user_existente:
-        # Retorna o formulário com mensagem de erro
+    """
+    Processa o envio do formulário de cadastro.
+
+    Form(...) instrui o FastAPI a ler os campos do
+    corpo do formulário HTML (application/x-www-form-urlencoded).
+    O "..." significa que o campo é obrigatório.
+    """
+
+    # Verifica se o email já está cadastrado
+    usuario_existente = db.query(Usuario).filter(
+        Usuario.email == email
+    ).first()
+
+    if usuario_existente:
+        # Retorna ao formulário com mensagem de erro
         return templates.TemplateResponse(
             request,
-            "auth/cadastro.html",
-            {"request": request, "erro": "Este e-mail já está cadastrado."}
+            "auth/register.html",
+            {
+                "request": request,
+                "erro": "Este e-mail já está cadastrado."
+            },
+            status_code=400
         )
-    
-    #Criar o novo usuário com senha hash
+
+    # Cria o novo usuário com a senha já "hashada"
     novo_usuario = Usuario(
         nome=nome,
         email=email,
-        senha_hash=hash_senha(senha), #Nunca salva a senha pura no db
-        )
-    
-    db.add(novo_usuario)
-    db.commit()
+        senha_hash=hash_senha(senha),  # NUNCA salvar a senha pura
+        role="operador"                # role padrão para novos cadastros
+    )
 
-    #Redirecionar para login após cadastro
+    db.add(novo_usuario)    # prepara o INSERT
+    db.commit()             # executa no banco
+    db.refresh(novo_usuario)  # atualiza o objeto com o id gerado
+
+    # Redireciona para o login após cadastro bem-sucedido
     return RedirectResponse(url="/auth/login?cadastro=ok", status_code=302)
 
-#Rota de login
+
+# ============================================================
+# LOGIN
+# ============================================================
+
+@router.get("/login")
+def pagina_login(request: Request):
+    """Exibe o formulário de login."""
+    return templates.TemplateResponse(
+        request,
+        "auth/login.html",
+        {"request": request}
+    )
+
+
 @router.post("/login")
-def fazer_login(
+def login(
     request: Request,
     email: str = Form(...),
     senha: str = Form(...),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db)
 ):
-    # Buscar o usuário no banco pelo email
-    usuario = db.query(Usuario).filter_by(email=email).first()
+    """
+    Processa o login e define o cookie JWT.
 
-    # Verificar a senha com bcrypt
-    senha_correta = ( usuario is not None and verificar_senha(senha, usuario.senha_hash))
+    Fluxo:
+    1. Busca o usuário pelo email
+    2. Verifica a senha com bcrypt
+    3. Gera o token JWT
+    4. Salva o token em um cookie HttpOnly
+    5. Redireciona para a página principal
+    """
+
+    # Busca o usuário no banco pelo email
+    usuario = db.query(Usuario).filter(
+        Usuario.email == email
+    ).first()
+
+    # Verifica usuário E senha em passos separados para evitar
+    # "timing attacks" (atacante deduz se o email existe pelo tempo de resposta)
+    senha_correta = (
+        usuario is not None and
+        verificar_senha(senha, usuario.senha_hash)
+    )
 
     if not senha_correta:
         return templates.TemplateResponse(
             request,
             "auth/login.html",
-            {"request": request, "erro": "Email ou senha incorretos."}
+            {
+                "request": request,
+                "erro": "E-mail ou senha incorretos."
+            },
+            status_code=401
         )
-    
+
     if not usuario.ativo:
         return templates.TemplateResponse(
             request,
             "auth/login.html",
-            {"request": request, "erro": "Usuário inativo."}
+            {
+                "request": request,
+                "erro": "Usuário inativo. Contate o administrador."
+            },
+            status_code=403
         )
 
-    # Gera o token JWT
+    # Dados que ficarão no payload do JWT
+    # "sub" (subject) é a convenção JWT para identificar o usuário
     token_data = {
         "sub": usuario.email,
         "nome": usuario.nome,
@@ -96,25 +160,33 @@ def fazer_login(
 
     token = criar_token(token_data)
 
-    # Salvar o token em cookie Httponly
+    # Cria a resposta de redirecionamento
     response = RedirectResponse(url="/", status_code=302)
 
+    # Define o cookie com o token JWT
     response.set_cookie(
         key="access_token",
         value=token,
-        httponly=True,
-        max_age= 3600, # Expira em 1 hora (Em segundos)
-        samesite="lax"
+        httponly=True,    # JavaScript NÃO pode ler este cookie (proteção XSS)
+        max_age=3600,     # expira em 1 hora (em segundos)
+        samesite="lax",   # proteção básica contra CSRF
+        # secure=True     # ativar em produção (exige HTTPS)
     )
 
     return response
 
-    # Redirecionar para a página principal
 
-#Rota de sair
+# ============================================================
+# LOGOUT
+# ============================================================
 
 @router.get("/logout")
-def sair():
+def logout():
+    """
+    Remove o cookie do browser, encerrando a sessão.
+    Basta deletar o cookie — o token em si é stateless,
+    não precisamos removê-lo do banco.
+    """
     response = RedirectResponse(url="/auth/login", status_code=302)
     response.delete_cookie("access_token")
     return response
