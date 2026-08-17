@@ -80,17 +80,11 @@ class ItemVenda(Base):
         ForeignKey("produtos.id", ondelete="SET NULL"),
         nullable=True
     )
-    produto_variacao_id = Column(
-        Integer,
-        ForeignKey("produto_variacoes.id", ondelete="SET NULL"),
-        nullable=True
-    )
 
     # Dados históricos — não dependem do produto atual no banco
-    produto_nome               = Column(String(150), nullable=False)
-    produto_variacao_descricao = Column(String(150), nullable=True)
-    quantidade                 = Column(Integer, nullable=False)
-    preco_unitario             = Column(Float, nullable=False)   # preço no momento da venda
+    produto_nome   = Column(String(150), nullable=False)
+    quantidade     = Column(Integer, nullable=False)
+    preco_unitario = Column(Float, nullable=False)   # preço no momento da venda
 
     @property
     def subtotal(self) -> float:
@@ -99,4 +93,5 @@ class ItemVenda(Base):
     # Relacionamentos
     venda   = relationship("Venda", back_populates="itens")
     produto = relationship("Produto", backref="itens_venda")
-    variacao = relationship("ProdutoVariacao", backref="itens_venda")
+
+    

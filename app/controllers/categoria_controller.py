@@ -1,3 +1,6 @@
+# ============================================================
+# controllers/categoria_controller.py — CRUD de categorias
+# ============================================================
 # Categorias são gerenciadas apenas por admins.
 # Operadores apenas visualizam (via select no form de produto).
 # ============================================================
@@ -206,4 +209,4 @@ def toggle_ativo(
     categoria.ativo = not categoria.ativo
     db.commit()
 
-    return RedirectResponse(url="/categorias?toggle=ok", status_code=302)
+    return RedirectResponse(url="/categorias", status_code=302)
