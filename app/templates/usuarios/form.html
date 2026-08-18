@@ -7,6 +7,8 @@
         O template usa isso para adaptar título, action e campos.
     -->
     <title>{{ "Editar" if editando else "Novo" }} Usuário — Estoque</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% include "_aapm_styles.html" %}
 </head>
 <body>
     <h1>{{ "Editar usuário" if editando else "Novo usuário" }}</h1>
