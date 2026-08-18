@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ "Editar" if editando else "Novo" }} Produto — AAPM SENAI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% include "_aapm_styles.html" %}
 </head>
 <body>
     <h1>{{ "Editar produto" if editando else "Novo produto" }}</h1>
@@ -43,6 +45,17 @@
                    min="0"
                    value="{{ editando.estoque_atual if editando else (valores.estoque_atual if valores else '0') }}"
                    required>
+        </label>
+        <br>
+
+        <label>Tamanho ou variacao:
+            <input type="text" name="variacao" list="variacoes-sugeridas"
+                   placeholder="Ex.: M, GG, HB, 2B ou Azul"
+                   value="{{ editando.variacao if editando else (valores.variacao if valores else '') }}">
+            <datalist id="variacoes-sugeridas">
+                <option value="Unico"><option value="P"><option value="M"><option value="G"><option value="GG">
+                <option value="HB"><option value="2B"><option value="4B">
+            </datalist>
         </label>
         <br>
 

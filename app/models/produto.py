@@ -14,6 +14,7 @@ class Produto(Base):
     nome          = Column(String(150), nullable=False, index=True)
     preco         = Column(Float, nullable=False, default=0.0)
     estoque_atual = Column(Integer, nullable=False, default=0)
+    variacao      = Column(String(80), nullable=True, index=True)
     ativo         = Column(Boolean, default=True)
 
     # ----------------------------------------------------------
