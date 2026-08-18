@@ -9,10 +9,12 @@
 # ============================================================
 
 import json
+from datetime import datetime, time
 from fastapi import APIRouter, Depends, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from app.database import get_db
 from app.models.venda import Venda, ItemVenda
@@ -210,4 +212,35 @@ def historico_vendas(
         request,
         "pdv/historico.html",
         {"request": request, "usuario": usuario, "vendas": vendas}
+    )
+
+
+@router.get("/extrato")
+def extrato_pdv(
+    request: Request,
+    db: Session = Depends(get_db),
+    usuario = Depends(get_usuario_logado)
+):
+    """Resumo financeiro e operacional das vendas realizadas no dia."""
+    inicio_hoje = datetime.combine(datetime.now().date(), time.min)
+    vendas_hoje = db.query(Venda).filter(Venda.criado_em >= inicio_hoje)
+    resumo = vendas_hoje.with_entities(
+        func.count(Venda.id),
+        func.coalesce(func.sum(Venda.total_bruto), 0),
+        func.coalesce(func.sum(Venda.total_liquido), 0),
+    ).one()
+    ultimas_vendas = vendas_hoje.order_by(Venda.criado_em.desc()).limit(10).all()
+
+    return templates.TemplateResponse(
+        request,
+        "pdv/extrato.html",
+        {
+            "request": request,
+            "usuario": usuario,
+            "quantidade_vendas": resumo[0],
+            "total_bruto": resumo[1],
+            "total_liquido": resumo[2],
+            "total_descontos": resumo[1] - resumo[2],
+            "ultimas_vendas": ultimas_vendas,
+        }
     )

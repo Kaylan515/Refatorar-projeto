@@ -36,9 +36,16 @@
             {% endfor %}
         </select>
 
+        <select name="variacao">
+            <option value="">Todos os tamanhos/variacoes</option>
+            {% for item in variacoes %}
+            <option value="{{ item }}" {{ 'selected' if variacao == item else '' }}>{{ item }}</option>
+            {% endfor %}
+        </select>
+
         <button type="submit">Filtrar</button>
 
-        {% if busca or categoria_id %}
+        {% if busca or categoria_id or variacao %}
         <a href="/produtos">Limpar</a>
         {% endif %}
 
@@ -57,6 +64,7 @@
 
         <thead>
             <tr>
+                <th>Variacao</th>
                 <th>Imagem</th>
                 <th>Nome</th>
                 <th>Categoria</th>
@@ -71,6 +79,8 @@
             {% for p in produtos %}
 
             <tr>
+
+                <td>{{ p.variacao or '-' }}</td>
 
                 <td>
                     <img src="{{ p.imagem_url }}" alt="{{ p.nome }}" width="50" height="50" style="object-fit:cover">
@@ -121,7 +131,7 @@
             {% if not produtos %}
 
             <tr>
-                <td colspan="6" style="text-align:center">
+                <td colspan="7" style="text-align:center">
                     Nenhum produto encontrado.
                 </td>
             </tr>

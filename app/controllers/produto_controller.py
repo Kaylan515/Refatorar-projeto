@@ -48,6 +48,7 @@ def listar_produtos(
     request: Request,
     busca: str = "",
     categoria_id: int = 0,
+    variacao: str = "",
     pagina: int = 1,
     por_pagina: int = 10,
     db: Session = Depends(get_db),
@@ -69,6 +70,9 @@ def listar_produtos(
         query = query.filter(
             Produto.categoria_id == categoria_id
         )
+
+    if variacao:
+        query = query.filter(Produto.variacao == variacao)
 
     # Ordenação
     query = query.order_by(Produto.nome)
@@ -108,6 +112,11 @@ def listar_produtos(
         .filter(Categoria.ativo == True)
         .all()
     )
+    variacoes = [
+        valor for (valor,) in db.query(Produto.variacao)
+        .filter(Produto.ativo == True, Produto.variacao.isnot(None), Produto.variacao != "")
+        .distinct().order_by(Produto.variacao).all()
+    ]
 
     # Renderiza a página
     return templates.TemplateResponse(
@@ -120,6 +129,8 @@ def listar_produtos(
             "categorias": categorias,
             "busca": busca,
             "categoria_id": categoria_id,
+            "variacao": variacao,
+            "variacoes": variacoes,
 
             # Paginação
             "pagina": pagina,
@@ -168,6 +179,7 @@ async def criar_produto(
     nome: str = Form(...),
     preco: float = Form(...),
     estoque_atual: int = Form(...),
+    variacao: str = Form(""),
     categoria_id: int = Form(0),
     imagem: UploadFile = File(None),
     db: Session = Depends(get_db),
@@ -211,6 +223,7 @@ async def criar_produto(
         nome=nome,
         preco=preco,
         estoque_atual=estoque_atual,
+        variacao=variacao.strip() or None,
         categoria_id=categoria_id or None,
         imagem_path=imagem_path,
     )
@@ -313,6 +326,7 @@ async def editar_produto(
     nome: str = Form(...),
     preco: float = Form(...),
     estoque_atual: int = Form(...),
+    variacao: str = Form(""),
     categoria_id: int = Form(0),
     imagem: UploadFile = File(None),
     db: Session = Depends(get_db),
@@ -375,6 +389,7 @@ async def editar_produto(
     editando.nome = nome
     editando.preco = preco
     editando.estoque_atual = estoque_atual
+    editando.variacao = variacao.strip() or None
     editando.categoria_id = categoria_id or None
 
     db.commit()

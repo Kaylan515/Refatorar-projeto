@@ -1,5 +1,5 @@
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
 
     :root {
         --aapm-red: #c8102e;
@@ -16,9 +16,10 @@
     *, *::before, *::after { box-sizing: border-box; }
     html { background: var(--aapm-canvas); }
     body {
-        max-width: 1280px;
+        max-width: none;
+        width: 100%;
         min-height: 100vh;
-        margin: 0 auto;
+        margin: 0;
         padding: clamp(1.5rem, 4vw, 3.5rem);
         font-family: 'DM Sans', Arial, sans-serif;
         color: var(--aapm-ink);
@@ -34,7 +35,7 @@
         font: 800 .72rem/1 'Syne', sans-serif;
         letter-spacing: .16em;
     }
-    h1, h2, h3 { font-family: 'Syne', Arial, sans-serif; letter-spacing: -.035em; }
+    h1, h2, h3 { font-family: 'Space Grotesk', Arial, sans-serif; letter-spacing: -.035em; }
     h1 { margin: 0 0 1.75rem; font-size: clamp(2rem, 4vw, 3rem); line-height: 1.1; }
     h2 { margin-top: 2rem; }
     h3 { margin: 1.5rem 0 .75rem; }
@@ -88,4 +89,31 @@
         form { padding: 1rem; }
         table { display: block; overflow-x: auto; white-space: nowrap; }
     }
+    @media (max-width: 900px) {
+        body { padding: 1.25rem; }
+        form { max-width: none; }
+        table { display: block; overflow-x: auto; }
+    }
+
+    /* Tema operacional escuro, alinhado ao painel AAPM. */
+    html { background: #181312; }
+    body { color: #eee9e7; background: radial-gradient(circle at top right, #3b2528, #181312 52%); }
+    body::before { color: #ff4b5f; }
+    h1, h2, h3 { color: #fff; }
+    p { color: #b8aaa7; }
+    a { color: #ff6575; }
+    a:hover { color: #fff; }
+    a[href='/auth/register'] { display: none; }
+    p:has(a[href='/auth/register']) { display: none; }
+    body > a, form + a, p > a:first-child, .actions a { background: #211b1a; border-color: #443633; }
+    form, table { max-width: none; background: #211b1a; border-color: #443633; box-shadow: 0 16px 35px rgba(0,0,0,.18); }
+    label { color: #d6cdca; }
+    input, select, textarea { background: #181312; border-color: #443633; color: #f5efec; }
+    th { background: #2d2422; color: #fff; }
+    th, td { border-bottom-color: #443633; }
+    td { color: #d6cdca; }
+    tbody tr:hover { background: #2d2422; }
+    td[colspan] { min-height: 150px; padding: 3rem 1.25rem; color: #c4b8b5; text-align: center; }
+    .empty-state, .empty-message { min-height: 180px; display: grid; place-items: center; align-content: center; gap: .6rem; }
+    hr { border-color: #443633; }
 </style>

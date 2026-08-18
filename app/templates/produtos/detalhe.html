@@ -20,6 +20,8 @@
 
     <p>Categoria: {{ produto.categoria.nome if produto.categoria else "—" }}</p>
 
+    {% if produto.variacao %}<p>Tamanho ou variacao: <strong>{{ produto.variacao }}</strong></p>{% endif %}
+
     <table border="1" cellpadding="8">
         <tr><td><strong>Preço</strong></td>
             <td>R$ {{ "%.2f"|format(produto.preco) }}</td></tr>

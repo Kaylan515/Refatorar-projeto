@@ -26,6 +26,7 @@ templates = Jinja2Templates(directory="app/templates")
 
 @router.get("/register")
 def pagina_registro(request: Request):
+    return RedirectResponse(url="/auth/login", status_code=303)
     """Exibe o formulário de cadastro."""
     return templates.TemplateResponse(
         request,

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extrato do PDV — AAPM SENAI</title>
+    {% include "_aapm_styles.html" %}
+    <style>
+        .resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin: 1.5rem 0; }
+        .resumo-card { padding: 1.35rem; background: #211b1a; border: 1px solid #443633; border-radius: .9rem; }
+        .resumo-card span { display: block; color: #b8aaa7; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; }
+        .resumo-card strong { display: block; margin-top: .45rem; color: #fff; font: 700 1.9rem 'Space Grotesk', sans-serif; }
+        .resumo-card.destaque { border-top: 3px solid #ff4b5f; }
+    </style>
+</head>
+<body>
+    <h1>Extrato do PDV</h1>
+    <p>Resumo das vendas realizadas hoje.</p>
+
+    <section class="resumo">
+        <article class="resumo-card"><span>Vendas realizadas</span><strong>{{ quantidade_vendas }}</strong></article>
+        <article class="resumo-card"><span>Total bruto</span><strong>R$ {{ '%.2f'|format(total_bruto) }}</strong></article>
+        <article class="resumo-card"><span>Descontos associados</span><strong>R$ {{ '%.2f'|format(total_descontos) }}</strong></article>
+        <article class="resumo-card destaque"><span>Total líquido</span><strong>R$ {{ '%.2f'|format(total_liquido) }}</strong></article>
+    </section>
+
+    <h2>Últimas vendas</h2>
+    <table>
+        <thead><tr><th>Venda</th><th>Horário</th><th>Cliente</th><th>Total</th></tr></thead>
+        <tbody>
+            {% for venda in ultimas_vendas %}
+            <tr><td><a href="/pdv/venda/{{ venda.id }}">#{{ venda.id }}</a></td><td>{{ venda.criado_em.strftime('%H:%M') }}</td><td>{{ venda.cliente.nome if venda.cliente else 'Balcão' }}</td><td>R$ {{ '%.2f'|format(venda.total_liquido) }}</td></tr>
+            {% else %}
+            <tr><td colspan="4">Nenhuma venda registrada hoje.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p><a href="/pdv">Voltar ao PDV</a> <a href="/pdv/historico">Histórico completo</a></p>
+</body>
+</html>

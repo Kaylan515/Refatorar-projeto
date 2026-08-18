@@ -48,6 +48,17 @@
         </label>
         <br>
 
+        <label>Tamanho ou variacao:
+            <input type="text" name="variacao" list="variacoes-sugeridas"
+                   placeholder="Ex.: M, GG, HB, 2B ou Azul"
+                   value="{{ editando.variacao if editando else (valores.variacao if valores else '') }}">
+            <datalist id="variacoes-sugeridas">
+                <option value="Unico"><option value="P"><option value="M"><option value="G"><option value="GG">
+                <option value="HB"><option value="2B"><option value="4B">
+            </datalist>
+        </label>
+        <br>
+
         <label>Categoria:
             <select name="categoria_id">
                 <option value="0">Sem categoria</option>
