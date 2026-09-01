@@ -16,6 +16,8 @@
     <p style="color:green">Produto criado com sucesso!</p>
     {% endif %}
 
+    {% set total_registros = total_produtos %}{% include "_pagination.html" %}
+
     {% if request.query_params.get('desativado') == 'ok' %}
     <p style="color:green">Produto desativado.</p>
     {% endif %}
@@ -36,6 +38,10 @@
             {% endfor %}
         </select>
 
+        <select name="ordenar_por"><option value="nome" {{ 'selected' if ordenar_por == 'nome' else '' }}>Nome</option><option value="categoria" {{ 'selected' if ordenar_por == 'categoria' else '' }}>Categoria</option><option value="preco" {{ 'selected' if ordenar_por == 'preco' else '' }}>Preço</option><option value="estoque" {{ 'selected' if ordenar_por == 'estoque' else '' }}>Estoque</option></select>
+        <select name="direcao"><option value="asc" {{ 'selected' if direcao == 'asc' else '' }}>Crescente</option><option value="desc" {{ 'selected' if direcao == 'desc' else '' }}>Decrescente</option></select>
+        <select name="por_pagina">{% for tamanho in [10, 25, 50] %}<option value="{{ tamanho }}" {{ 'selected' if por_pagina == tamanho else '' }}>{{ tamanho }} por página</option>{% endfor %}</select>
+
         <select name="variacao">
             <option value="">Todos os tamanhos/variacoes</option>
             {% for item in variacoes %}
@@ -45,7 +51,7 @@
 
         <button type="submit">Filtrar</button>
 
-        {% if busca or categoria_id or variacao %}
+        {% if busca or categoria_id or variacao or ordenar_por != 'nome' or direcao != 'asc' %}
         <a href="/produtos">Limpar</a>
         {% endif %}
 
@@ -157,7 +163,7 @@
         {% if pagina > 1 %}
 
         <a
-            href="/produtos?pagina={{ pagina - 1 }}&por_pagina={{ por_pagina }}&busca={{ busca }}&categoria_id={{ categoria_id }}">
+            href="/produtos?pagina={{ pagina - 1 }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}&categoria_id={{ categoria_id }}&variacao={{ variacao|urlencode }}&ordenar_por={{ ordenar_por }}&direcao={{ direcao }}">
             ← Anterior
         </a>
 
@@ -165,7 +171,7 @@
 
 
         {% if pagina > 1 and pagina < total_paginas %} &nbsp; | &nbsp; {% endif %} {% if pagina < total_paginas %} <a
-            href="/produtos?pagina={{ pagina + 1 }}&por_pagina={{ por_pagina }}&busca={{ busca }}&categoria_id={{ categoria_id }}">
+            href="/produtos?pagina={{ pagina + 1 }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}&categoria_id={{ categoria_id }}&variacao={{ variacao|urlencode }}&ordenar_por={{ ordenar_por }}&direcao={{ direcao }}">
             Próximo →
             </a>
 

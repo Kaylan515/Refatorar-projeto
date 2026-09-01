@@ -9,12 +9,13 @@
 # ============================================================
 
 import json
-from datetime import datetime, time
+import math
+from datetime import datetime, time, timedelta
 from fastapi import APIRouter, Depends, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import String, func, or_
 
 from app.database import get_db
 from app.models.venda import Venda, ItemVenda
@@ -198,20 +199,58 @@ def detalhe_venda(
 @router.get("/historico")
 def historico_vendas(
     request: Request,
+    busca: str = "",
+    cliente_id: int = 0,
+    data_inicio: str = "",
+    data_fim: str = "",
+    ordenar_por: str = "data",
+    direcao: str = "desc",
+    pagina: int = 1,
+    por_pagina: int = 10,
     db: Session = Depends(get_db),
     usuario = Depends(get_usuario_logado)
 ):
-    """Histórico de todas as vendas."""
-    vendas = (
-        db.query(Venda)
-        .order_by(Venda.criado_em.desc())
-        .limit(100)
-        .all()
-    )
+    """Histórico de vendas com filtros, ordenação e paginação."""
+    query = db.query(Venda)
+    if cliente_id:
+        query = query.filter(Venda.cliente_id == cliente_id)
+    if busca:
+        termo = f"%{busca}%"
+        query = query.outerjoin(Cliente).filter(
+            or_(Cliente.nome.ilike(termo), Venda.observacao.ilike(termo), Venda.id.cast(String).ilike(termo))
+        )
+    try:
+        if data_inicio:
+            query = query.filter(Venda.criado_em >= datetime.fromisoformat(data_inicio))
+        if data_fim:
+            query = query.filter(Venda.criado_em < datetime.fromisoformat(data_fim) + timedelta(days=1))
+    except ValueError:
+        data_inicio = ""
+        data_fim = ""
+
+    ordenacoes = {"data": Venda.criado_em, "total": Venda.total_liquido, "desconto": Venda.desconto_percentual, "id": Venda.id}
+    ordenar_por = ordenar_por if ordenar_por in ordenacoes else "data"
+    direcao = direcao if direcao in ("asc", "desc") else "desc"
+    coluna_ordenacao = ordenacoes[ordenar_por]
+    query = query.order_by(coluna_ordenacao.desc() if direcao == "desc" else coluna_ordenacao.asc(), Venda.id.desc())
+    total_vendas = query.count()
+    pagina = max(pagina, 1)
+    por_pagina = min(max(por_pagina, 1), 100)
+    total_paginas = max(math.ceil(total_vendas / por_pagina), 1)
+    pagina = min(pagina, total_paginas)
+    vendas = query.offset((pagina - 1) * por_pagina).limit(por_pagina).all()
+    clientes = db.query(Cliente).filter(Cliente.ativo == True).order_by(Cliente.nome).all()
     return templates.TemplateResponse(
         request,
         "pdv/historico.html",
-        {"request": request, "usuario": usuario, "vendas": vendas}
+        {
+            "request": request, "usuario": usuario, "vendas": vendas,
+            "clientes": clientes, "busca": busca, "cliente_id": cliente_id,
+            "data_inicio": data_inicio, "data_fim": data_fim,
+            "ordenar_por": ordenar_por, "direcao": direcao,
+            "pagina": pagina, "por_pagina": por_pagina,
+            "total_paginas": total_paginas, "total_vendas": total_vendas,
+        }
     )
 
 

@@ -7,7 +7,10 @@
 # os produtos — operadores veem apenas suas próprias.
 # ============================================================
 
+import math
+
 from fastapi import APIRouter, Depends, Request, Form
+from sqlalchemy import or_
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
@@ -31,6 +34,11 @@ def listar_movimentacoes(
     request: Request,
     produto_id: int = 0,     # filtra por produto específico
     tipo: str = "",          # "entrada" ou "saida"
+    busca: str = "",
+    ordenar_por: str = "data",
+    direcao: str = "desc",
+    pagina: int = 1,
+    por_pagina: int = 10,
     db: Session = Depends(get_db),
     admin = Depends(get_admin)
 ):
@@ -38,15 +46,31 @@ def listar_movimentacoes(
     Exibe o histórico completo de movimentações com filtros
     por produto e tipo. Acessível apenas por admins.
     """
-    query = db.query(Movimentacao).order_by(Movimentacao.criado_em.desc())
+    query = db.query(Movimentacao)
 
     if produto_id:
         query = query.filter(Movimentacao.produto_id == produto_id)
 
-    if tipo in ("entrada", "saida", "cancelamento", "ajuste"):
+    if tipo in ("entrada", "saida"):
         query = query.filter(Movimentacao.tipo == tipo)
 
-    movimentacoes = query.limit(200).all()  # limita para não sobrecarregar
+    if busca:
+        termo = f"%{busca}%"
+        query = query.join(Produto).filter(or_(Produto.nome.ilike(termo), Movimentacao.observacao.ilike(termo)))
+
+    ordenacoes = {"data": Movimentacao.criado_em, "produto": Produto.nome, "tipo": Movimentacao.tipo, "quantidade": Movimentacao.quantidade, "valor": Movimentacao.preco_unitario}
+    ordenar_por = ordenar_por if ordenar_por in ordenacoes else "data"
+    direcao = direcao if direcao in ("asc", "desc") else "desc"
+    if ordenar_por == "produto" and not busca:
+        query = query.join(Produto)
+    coluna_ordenacao = ordenacoes[ordenar_por]
+    query = query.order_by(coluna_ordenacao.desc() if direcao == "desc" else coluna_ordenacao.asc(), Movimentacao.id.desc())
+    total_movimentacoes = query.count()
+    pagina = max(pagina, 1)
+    por_pagina = min(max(por_pagina, 1), 100)
+    total_paginas = max(math.ceil(total_movimentacoes / por_pagina), 1)
+    pagina = min(pagina, total_paginas)
+    movimentacoes = query.offset((pagina - 1) * por_pagina).limit(por_pagina).all()
     produtos      = db.query(Produto).filter(Produto.ativo == True).all()
 
     return templates.TemplateResponse(
@@ -59,6 +83,13 @@ def listar_movimentacoes(
             "produtos":       produtos,
             "produto_id":     produto_id,
             "tipo":           tipo,
+            "busca":          busca,
+            "ordenar_por":    ordenar_por,
+            "direcao":        direcao,
+            "pagina":         pagina,
+            "por_pagina":     por_pagina,
+            "total_paginas":  total_paginas,
+            "total_movimentacoes": total_movimentacoes,
         }
     )
 

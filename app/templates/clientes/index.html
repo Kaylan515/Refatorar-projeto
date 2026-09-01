@@ -23,6 +23,7 @@
                 {{ 'checked' if apenas_associados }}>
             Apenas associados
         </label>
+        <select name="status"><option value="">Todos os status</option><option value="ativo">Ativos</option><option value="inativo">Inativos</option></select><select name="ordenar_por"><option value="nome">Nome</option><option value="matricula">Matrícula</option><option value="criado_em">Data de cadastro</option></select><select name="direcao"><option value="asc">Crescente</option><option value="desc">Decrescente</option></select><select name="por_pagina"><option value="10">10 por página</option><option value="25">25 por página</option><option value="50">50 por página</option></select>
         <button type="submit">Filtrar</button>
         {% if busca or apenas_associados %}
             <a href="/clientes">Limpar</a>
@@ -72,6 +73,8 @@
             {% endif %}
         </tbody>
     </table>
+    <p>Página {{ pagina }} de {{ total_paginas }} ({{ total_clientes }} clientes)</p>
+    {% set total_registros = total_clientes %}{% include "_pagination.html" %}
 
     <p><a href="/">← Dashboard</a></p>
 </body>

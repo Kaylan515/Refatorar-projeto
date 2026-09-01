@@ -1,0 +1,28 @@
+body { font-family: 'Courier New', monospace; max-width: 400px;
+               margin: 40px auto; background: #f8fafc; color: #1e293b; }
+        .cupom { background: #fff; border: 1px solid #e2e8f0;
+                 border-radius: 12px; padding: 28px; }
+        .titulo { text-align: center; font-weight: 700;
+                  font-size: 18px; margin-bottom: 4px; }
+        .subtitulo { text-align: center; color: #64748b;
+                     font-size: 12px; margin-bottom: 20px; }
+        .linha-sep { border: none; border-top: 1px dashed #e2e8f0;
+                     margin: 14px 0; }
+        .item-linha { display: flex; justify-content: space-between;
+                      font-size: 13px; margin-bottom: 6px; }
+        .item-desc { color: #64748b; font-size: 11px; margin-bottom: 8px; }
+        .total-linha { display: flex; justify-content: space-between;
+                       font-size: 13px; margin-bottom: 6px; color: #64748b; }
+        .total-final { display: flex; justify-content: space-between;
+                       font-size: 18px; font-weight: 800; margin-top: 10px; }
+        .desc-linha { color: #15803d; }
+        .btn { display: block; text-align: center; margin-top: 20px;
+               padding: 12px; border-radius: 8px; font-weight: 700;
+               font-size: 14px; text-decoration: none; }
+        .btn-nova { background: #c8102e; color: #fff; }
+        .btn-hist  { background: #f1f5f9; color: #1e293b; margin-top: 8px; }
+        body { background: #181312; color: #eee9e7; }
+        .cupom { background: #211b1a; border-color: #443633; }
+        .subtitulo, .item-desc, .total-linha { color: #c4b8b5; }
+        .linha-sep { border-color: #443633; }
+        .btn-hist { background: #2d2422; color: #fff; }

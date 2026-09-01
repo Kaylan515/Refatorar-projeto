@@ -18,6 +18,9 @@
     {% if request.query_params.get('cadastro') == 'ok' %}
         <p style="color: green;">Cadastro realizado! Faça login.</p>
     {% endif %}
+    {% if request.query_params.get('mensagem') == 'cadastro_restrito' %}
+        <p>Os usuários são cadastrados pelo administrador.</p>
+    {% endif %}
 
     <!--
         action="/auth/login" → envia para nosso endpoint POST
@@ -35,6 +38,6 @@
         <button type="submit">Entrar</button>
     </form>
 
-    <p>Não tem conta? <a href="/auth/register">Cadastre-se</a></p>
+    <p><a href="/">← Voltar à página inicial</a></p>
 </body>
 </html>

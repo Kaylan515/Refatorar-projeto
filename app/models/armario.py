@@ -2,7 +2,8 @@
 # models/armario.py — Tabela de armários
 # ============================================================
 
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum, ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database import Base
 import enum
@@ -59,3 +60,18 @@ class Armario(Base):
     @property
     def disponivel(self) -> bool:
         return self.status == StatusArmario.DISPONIVEL
+
+
+class ReservaArmario(Base):
+    """Registro histórico de cada período de aluguel de um armário."""
+    __tablename__ = "reservas_armarios"
+
+    id = Column(Integer, primary_key=True, index=True)
+    armario_id = Column(Integer, ForeignKey("armarios.id", ondelete="CASCADE"), nullable=False)
+    locatario_nome = Column(String(150), nullable=False)
+    semestre = Column(String(10), nullable=False)
+    observacao = Column(String(255), nullable=True)
+    iniciado_em = Column(DateTime, server_default=func.now(), nullable=False)
+    encerrado_em = Column(DateTime, nullable=True)
+
+    armario = relationship("Armario", backref="reservas")

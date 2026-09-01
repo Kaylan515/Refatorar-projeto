@@ -12,7 +12,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models.armario import Armario, StatusArmario
+from app.models.armario import Armario, ReservaArmario, StatusArmario
 from app.auth import get_usuario_logado, get_admin
 
 router = APIRouter(prefix="/armarios", tags=["Armários"])
@@ -289,6 +289,13 @@ def alugar(
     armario.observacao     = observacao.strip() or armario.observacao
     armario.alugado_em     = datetime.now(timezone.utc)
 
+    db.add(ReservaArmario(
+        armario_id=armario.id,
+        locatario_nome=locatario_nome.strip(),
+        semestre=semestre.strip(),
+        observacao=observacao.strip() or None,
+    ))
+
     db.commit()
 
     return RedirectResponse(
@@ -317,6 +324,12 @@ def liberar(
     if not armario:
         return RedirectResponse(url="/armarios", status_code=302)
 
+    reserva_atual = (db.query(ReservaArmario)
+        .filter(ReservaArmario.armario_id == armario_id, ReservaArmario.encerrado_em.is_(None))
+        .order_by(ReservaArmario.iniciado_em.desc()).first())
+    if reserva_atual:
+        reserva_atual.encerrado_em = datetime.now(timezone.utc)
+
     armario.status         = StatusArmario.DISPONIVEL
     armario.locatario_nome = None
     armario.semestre       = None
@@ -328,6 +341,15 @@ def liberar(
         url=f"/armarios/{armario_id}?liberado=ok",
         status_code=302
     )
+
+
+@router.get("/{armario_id}/historico")
+def historico_reservas(armario_id: int, request: Request, db: Session = Depends(get_db), usuario=Depends(get_usuario_logado)):
+    armario = db.query(Armario).filter(Armario.id == armario_id).first()
+    if not armario:
+        return RedirectResponse(url="/armarios", status_code=302)
+    reservas = db.query(ReservaArmario).filter(ReservaArmario.armario_id == armario_id).order_by(ReservaArmario.iniciado_em.desc()).all()
+    return templates.TemplateResponse(request, "armarios/historico.html", {"request": request, "usuario": usuario, "armario": armario, "reservas": reservas})
 
 
 # ============================================================
