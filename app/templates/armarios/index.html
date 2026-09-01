@@ -29,6 +29,7 @@
 
     <!-- Filtros -->
     <form method="get" action="/armarios">
+        <input type="search" name="busca" value="{{ busca }}" placeholder="Armário ou aluno">
         <select name="status">
             <option value="">Todos os status</option>
             <option value="disponivel" {{ 'selected' if status == 'disponivel' }}>Disponíveis</option>
@@ -48,6 +49,8 @@
         </select>
         {% endif %}
 
+        {% if semestres %}<select name="semestre"><option value="">Todos os semestres</option>{% for item in semestres %}<option value="{{ item }}" {{ 'selected' if semestre == item else '' }}>{{ item }}</option>{% endfor %}</select>{% endif %}
+
         <button type="submit">Filtrar</button>
         {% if status or localizacao %}
             <a href="/armarios">Limpar</a>
@@ -57,6 +60,7 @@
     {% if usuario.role == 'admin' %}
         <a href="/armarios/novo">+ Novo armário</a>
     {% endif %}
+    <a href="/armarios/historico">Histórico de reservas</a>
 
     <!-- Grade de armários -->
     <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:20px;">
