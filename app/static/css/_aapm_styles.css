@@ -118,3 +118,28 @@
     .pagination { display:flex; align-items:center; gap:.8rem; flex-wrap:wrap; margin:1rem 0; }
     .pagination span { color:#c4b8b5; }
     .pagination a { padding:.45rem .7rem; border:1px solid #443633; border-radius:.4rem; text-decoration:none; }
+    .auth-page {
+        display: grid;
+        place-items: center;
+        padding: 1.5rem;
+    }
+    .auth-page::before { display: none; }
+    .auth-card {
+        width: min(100%, 460px);
+        padding: clamp(1.5rem, 4vw, 2.5rem);
+        background: #211b1a;
+        border: 1px solid #443633;
+        border-radius: 1rem;
+        box-shadow: 0 20px 48px rgba(0, 0, 0, .3);
+    }
+    .auth-card h1 { text-align: center; }
+    .auth-card form {
+        max-width: none;
+        margin-bottom: 1rem;
+        padding: 0;
+        background: transparent;
+        border: 0;
+        box-shadow: none;
+    }
+    .auth-card form button { width: 100%; }
+    .auth-card > p { text-align: center; }

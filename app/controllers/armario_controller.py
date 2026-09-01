@@ -5,6 +5,7 @@
 # Qualquer logado: visualiza o mapa de disponibilidade.
 # ============================================================
 
+import math
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -29,6 +30,8 @@ def listar_armarios(
     request: Request,
     status: str = "",           # filtra por status
     localizacao: str = "",      # filtra por localização
+    busca: str = "",
+    semestre: str = "",
     db: Session = Depends(get_db),
     usuario = Depends(get_usuario_logado)
 ):
@@ -43,6 +46,11 @@ def listar_armarios(
 
     if localizacao:
         query = query.filter(Armario.localizacao.ilike(f"%{localizacao}%"))
+    if busca:
+        termo = f"%{busca}%"
+        query = query.filter((Armario.numero.ilike(termo)) | (Armario.locatario_nome.ilike(termo)))
+    if semestre:
+        query = query.filter(Armario.semestre == semestre)
 
     armarios = query.order_by(Armario.numero).all()
 
@@ -69,12 +77,33 @@ def listar_armarios(
             "status":       status,
             "localizacao":  localizacao,
             "localizacoes": localizacoes,
+            "busca": busca,
+            "semestre": semestre,
+            "semestres": sorted(set(a.semestre for a in todos if a.semestre)),
             "StatusArmario": StatusArmario,
         }
     )
 
 
 # ============================================================
+# HISTÓRICO GERAL DE RESERVAS
+# ============================================================
+@router.get("/historico")
+def listar_historico_reservas(request: Request, busca: str = "", semestre: str = "", pagina: int = 1, db: Session = Depends(get_db), usuario=Depends(get_usuario_logado)):
+    query = db.query(ReservaArmario).join(Armario)
+    if busca:
+        termo = f"%{busca}%"
+        query = query.filter((ReservaArmario.locatario_nome.ilike(termo)) | (Armario.numero.ilike(termo)))
+    if semestre:
+        query = query.filter(ReservaArmario.semestre == semestre)
+    total_registros, por_pagina = query.count(), 10
+    total_paginas = max(math.ceil(total_registros / por_pagina), 1)
+    pagina = min(max(pagina, 1), total_paginas)
+    reservas = query.order_by(ReservaArmario.iniciado_em.desc()).offset((pagina - 1) * por_pagina).limit(por_pagina).all()
+    semestres = [item[0] for item in db.query(ReservaArmario.semestre).distinct().order_by(ReservaArmario.semestre).all()]
+    return templates.TemplateResponse(request, "armarios/historico_geral.html", {"request": request, "usuario": usuario, "reservas": reservas, "busca": busca, "semestre": semestre, "semestres": semestres, "pagina": pagina, "total_paginas": total_paginas, "total_registros": total_registros})
+
+
 # CADASTRO DE ARMÁRIO — somente admin
 # ============================================================
 
