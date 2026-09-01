@@ -5,6 +5,7 @@
     {% include "_aapm_styles.html" %}
     <h1>Histórico de vendas</h1>
     <a href="/pdv">← Voltar ao PDV</a>
+    <form method="get" action="/pdv/historico"><input type="text" name="busca" placeholder="Cliente, observação ou nº da venda..." value="{{ busca }}"><select name="cliente_id"><option value="0">Todos os clientes</option>{% for c in clientes %}<option value="{{ c.id }}" {{ 'selected' if cliente_id == c.id else '' }}>{{ c.nome }}</option>{% endfor %}</select><label>De <input type="date" name="data_inicio" value="{{ data_inicio }}"></label><label>Até <input type="date" name="data_fim" value="{{ data_fim }}"></label><select name="ordenar_por"><option value="data">Data</option><option value="id">Número</option><option value="total">Total</option><option value="desconto">Desconto</option></select><select name="direcao"><option value="asc">Crescente</option><option value="desc">Decrescente</option></select><select name="por_pagina"><option value="10">10 por página</option><option value="25">25 por página</option><option value="50">50 por página</option></select><button type="submit">Filtrar</button></form>
 
     <table border="1" cellpadding="8">
         <thead>
@@ -42,5 +43,7 @@
             {% endif %}
         </tbody>
     </table>
+    <p>Página {{ pagina }} de {{ total_paginas }} ({{ total_vendas }} vendas)</p>
+    {% set total_registros = total_vendas %}{% include "_pagination.html" %}
 </body>
 </html>

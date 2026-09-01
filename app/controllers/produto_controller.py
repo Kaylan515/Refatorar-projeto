@@ -49,6 +49,8 @@ def listar_produtos(
     busca: str = "",
     categoria_id: int = 0,
     variacao: str = "",
+    ordenar_por: str = "nome",
+    direcao: str = "asc",
     pagina: int = 1,
     por_pagina: int = 10,
     db: Session = Depends(get_db),
@@ -75,7 +77,21 @@ def listar_produtos(
         query = query.filter(Produto.variacao == variacao)
 
     # Ordenação
-    query = query.order_by(Produto.nome)
+    ordenacoes = {
+        "nome": Produto.nome,
+        "categoria": Categoria.nome,
+        "preco": Produto.preco,
+        "estoque": Produto.estoque_atual,
+    }
+    ordenar_por = ordenar_por if ordenar_por in ordenacoes else "nome"
+    direcao = direcao if direcao in ("asc", "desc") else "asc"
+    if ordenar_por == "categoria":
+        query = query.outerjoin(Categoria)
+    coluna_ordenacao = ordenacoes[ordenar_por]
+    query = query.order_by(
+        coluna_ordenacao.desc() if direcao == "desc" else coluna_ordenacao.asc(),
+        Produto.id.asc(),
+    )
 
     # Total de produtos encontrados
     total_produtos = query.count()
@@ -131,6 +147,8 @@ def listar_produtos(
             "categoria_id": categoria_id,
             "variacao": variacao,
             "variacoes": variacoes,
+            "ordenar_por": ordenar_por,
+            "direcao": direcao,
 
             # Paginação
             "pagina": pagina,

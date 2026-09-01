@@ -11,6 +11,7 @@
 
     <!-- Filtros -->
     <form method="get" action="/movimentacoes">
+        <input type="text" name="busca" placeholder="Produto ou observação..." value="{{ busca }}">
         <select name="produto_id">
             <option value="0">Todos os produtos</option>
             {% for p in produtos %}
@@ -20,6 +21,7 @@
                 </option>
             {% endfor %}
         </select>
+        <select name="ordenar_por"><option value="data">Data</option><option value="produto">Produto</option><option value="tipo">Tipo</option><option value="quantidade">Quantidade</option><option value="valor">Preço unitário</option></select><select name="direcao"><option value="asc">Crescente</option><option value="desc">Decrescente</option></select><select name="por_pagina"><option value="10">10 por página</option><option value="25">25 por página</option><option value="50">50 por página</option></select>
 
         <select name="tipo">
             <option value="">Todos os tipos</option>
@@ -86,6 +88,8 @@
             {% endif %}
         </tbody>
     </table>
+    <p>Página {{ pagina }} de {{ total_paginas }} ({{ total_movimentacoes }} movimentações)</p>
+    {% set total_registros = total_movimentacoes %}{% include "_pagination.html" %}
 
     <p><a href="/">← Dashboard</a></p>
 </body>

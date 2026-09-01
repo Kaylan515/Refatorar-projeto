@@ -2,6 +2,8 @@
 # controllers/cliente_controller.py — CRUD de clientes
 # ============================================================
 
+import math
+
 from fastapi import APIRouter, Depends, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -20,6 +22,11 @@ def listar_clientes(
     request: Request,
     busca: str = "",
     apenas_associados: bool = False,
+    status: str = "",
+    ordenar_por: str = "nome",
+    direcao: str = "asc",
+    pagina: int = 1,
+    por_pagina: int = 10,
     db: Session = Depends(get_db),
     admin = Depends(get_admin)
 ):
@@ -34,7 +41,21 @@ def listar_clientes(
     if apenas_associados:
         query = query.filter(Cliente.is_associado == True)
 
-    clientes = query.order_by(Cliente.nome).all()
+    if status in ("ativo", "inativo"):
+        query = query.filter(Cliente.ativo == (status == "ativo"))
+
+    ordenacoes = {"nome": Cliente.nome, "matricula": Cliente.matricula, "criado_em": Cliente.criado_em}
+    ordenar_por = ordenar_por if ordenar_por in ordenacoes else "nome"
+    direcao = direcao if direcao in ("asc", "desc") else "asc"
+    coluna_ordenacao = ordenacoes[ordenar_por]
+    query = query.order_by(coluna_ordenacao.desc() if direcao == "desc" else coluna_ordenacao.asc(), Cliente.id.asc())
+
+    total_clientes = query.count()
+    pagina = max(pagina, 1)
+    por_pagina = min(max(por_pagina, 1), 100)
+    total_paginas = max(math.ceil(total_clientes / por_pagina), 1)
+    pagina = min(pagina, total_paginas)
+    clientes = query.offset((pagina - 1) * por_pagina).limit(por_pagina).all()
 
     total_associados = db.query(Cliente).filter(
         Cliente.is_associado == True,
@@ -50,6 +71,13 @@ def listar_clientes(
             "clientes":          clientes,
             "busca":             busca,
             "apenas_associados": apenas_associados,
+            "status":             status,
+            "ordenar_por":        ordenar_por,
+            "direcao":            direcao,
+            "pagina":             pagina,
+            "por_pagina":         por_pagina,
+            "total_paginas":      total_paginas,
+            "total_clientes":     total_clientes,
             "total_associados":  total_associados,
         }
     )

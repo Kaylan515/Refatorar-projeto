@@ -5,7 +5,10 @@
 # Segue o mesmo padrão MVC do auth_controller.
 # ============================================================
 
+import math
+
 from fastapi import APIRouter, Depends, Request, Form, status
+from sqlalchemy import or_
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
@@ -26,11 +29,37 @@ templates = Jinja2Templates(directory="app/templates")
 @router.get("/")
 def listar_usuarios(
     request: Request,
+    busca: str = "",
+    role: str = "",
+    status: str = "",
+    ordenar_por: str = "nome",
+    direcao: str = "asc",
+    pagina: int = 1,
+    por_pagina: int = 10,
     db: Session = Depends(get_db),
     admin = Depends(get_admin)  # bloqueia quem não é admin
 ):
     """Lista todos os usuários cadastrados no sistema."""
-    usuarios = db.query(Usuario).order_by(Usuario.nome).all()
+    query = db.query(Usuario)
+    if busca:
+        termo = f"%{busca}%"
+        query = query.filter(or_(Usuario.nome.ilike(termo), Usuario.email.ilike(termo)))
+    if role in ("admin", "operador"):
+        query = query.filter(Usuario.role == role)
+    if status in ("ativo", "inativo"):
+        query = query.filter(Usuario.ativo == (status == "ativo"))
+
+    ordenacoes = {"nome": Usuario.nome, "email": Usuario.email, "role": Usuario.role, "criado_em": Usuario.criado_em}
+    ordenar_por = ordenar_por if ordenar_por in ordenacoes else "nome"
+    direcao = direcao if direcao in ("asc", "desc") else "asc"
+    coluna_ordenacao = ordenacoes[ordenar_por]
+    query = query.order_by(coluna_ordenacao.desc() if direcao == "desc" else coluna_ordenacao.asc(), Usuario.id.asc())
+    total_usuarios = query.count()
+    pagina = max(pagina, 1)
+    por_pagina = min(max(por_pagina, 1), 100)
+    total_paginas = max(math.ceil(total_usuarios / por_pagina), 1)
+    pagina = min(pagina, total_paginas)
+    usuarios = query.offset((pagina - 1) * por_pagina).limit(por_pagina).all()
 
     return templates.TemplateResponse(
         request,
@@ -38,7 +67,16 @@ def listar_usuarios(
         {
             "request": request,
             "usuario": admin,   # dados de quem está logado (para navbar)
-            "usuarios": usuarios  # lista para exibir na tabela
+            "usuarios": usuarios,
+            "busca": busca,
+            "role": role,
+            "status": status,
+            "ordenar_por": ordenar_por,
+            "direcao": direcao,
+            "pagina": pagina,
+            "por_pagina": por_pagina,
+            "total_paginas": total_paginas,
+            "total_usuarios": total_usuarios,
         }
     )
 

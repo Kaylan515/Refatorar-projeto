@@ -16,7 +16,7 @@ load_dotenv()
 
 # Lê a URL do banco definida no .env
 # Ex: "sqlite:///./estoque.db" ou "postgresql://user:senha@localhost/estoque"
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./estoque.db")
 
 # ------------------------------------------------------------
 # Engine — é o "motor" da conexão com o banco.

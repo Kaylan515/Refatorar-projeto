@@ -1,0 +1,5 @@
+.resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin: 1.5rem 0; }
+        .resumo-card { padding: 1.35rem; background: #211b1a; border: 1px solid #443633; border-radius: .9rem; }
+        .resumo-card span { display: block; color: #b8aaa7; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; }
+        .resumo-card strong { display: block; margin-top: .45rem; color: #fff; font: 700 1.9rem 'Space Grotesk', sans-serif; }
+        .resumo-card.destaque { border-top: 3px solid #ff4b5f; }

@@ -22,6 +22,8 @@
         <p style="color: red;">Você não pode desativar sua própria conta.</p>
     {% endif %}
 
+    <form method="get" action="/usuarios"><input type="text" name="busca" placeholder="Buscar por nome ou e-mail..." value="{{ busca }}"><select name="role"><option value="">Todos os perfis</option><option value="admin" {{ 'selected' if role == 'admin' else '' }}>Administrador</option><option value="operador" {{ 'selected' if role == 'operador' else '' }}>Operador</option></select><select name="status"><option value="">Todos os status</option><option value="ativo" {{ 'selected' if status == 'ativo' else '' }}>Ativos</option><option value="inativo" {{ 'selected' if status == 'inativo' else '' }}>Inativos</option></select><select name="ordenar_por"><option value="nome">Nome</option><option value="email">E-mail</option><option value="role">Perfil</option></select><select name="direcao"><option value="asc">Crescente</option><option value="desc">Decrescente</option></select><select name="por_pagina"><option value="10">10 por página</option><option value="25">25 por página</option><option value="50">50 por página</option></select><button type="submit">Filtrar</button></form>
+
     <table border="1" cellpadding="8">
         <thead>
             <tr>
@@ -59,6 +61,8 @@
             {% endfor %}
         </tbody>
     </table>
+    <p>Página {{ pagina }} de {{ total_paginas }} ({{ total_usuarios }} usuários)</p>
+    {% set total_registros = total_usuarios %}{% include "_pagination.html" %}
 
     <p><a href="/">← Voltar ao dashboard</a></p>
 </body>
