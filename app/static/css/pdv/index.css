@@ -184,7 +184,7 @@
 
         .cliente-select:focus { border-color: #c8102e; }
 
-        .cliente-filtros { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 0 0 10px; }
+        .cliente-filtros { display: none; }
         .cliente-filtro { border: 1px solid #443633; background: #2d2422; color: #c4b8b5; border-radius: 7px; padding: 7px 5px; font-size: 11px; font-weight: 700; cursor: pointer; }
         .cliente-filtro.ativo { background: #581b27; border-color: #ff4b5f; color: #fff; }
 
@@ -357,6 +357,10 @@
             color: #94a3b8;
             cursor: not-allowed;
         }
+        .carrinho-col { box-shadow: -12px 0 30px rgba(0,0,0,.16); }
+        .carrinho-footer { background: linear-gradient(180deg, #211b1a, #181312); }
+        .produto-card-preco { color: #4ade80; }
+        .desconto-badge { background: rgba(34,197,94,.15); color: #86efac; border: 1px solid rgba(34,197,94,.25); }
 
         /* Alertas de erro */
         .alerta {
@@ -374,7 +378,9 @@
         .produtos-header, .carrinho-header, .cliente-section { background: #211b1a; border-color: #443633; }
         .busca-input, .cliente-select, .obs-input { background: #181312; border-color: #443633; color: #f5efec; }
         .produto-card { background: #211b1a; border-color: #443633; }
-        .produto-card-nome, .item-nome, .total-final { color: #f5efec; }
+        .produto-card-nome, .item-nome, .item-subtotal, .qty-value, .total-linha.final { color: #f5efec; }
+        .item-preco-unit, .total-linha { color: #c4b8b5; }
+        .total-linha.desconto { color: #86efac; }
         .item-carrinho { border-color: #443633; }
         .item-carrinho:hover { background: #2d2422; }
         .qty-btn { background: #2d2422; border-color: #443633; color: #fff; }

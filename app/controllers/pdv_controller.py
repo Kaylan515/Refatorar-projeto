@@ -206,7 +206,6 @@ def historico_vendas(
     ordenar_por: str = "data",
     direcao: str = "desc",
     pagina: int = 1,
-    por_pagina: int = 10,
     db: Session = Depends(get_db),
     usuario = Depends(get_usuario_logado)
 ):
@@ -235,7 +234,7 @@ def historico_vendas(
     query = query.order_by(coluna_ordenacao.desc() if direcao == "desc" else coluna_ordenacao.asc(), Venda.id.desc())
     total_vendas = query.count()
     pagina = max(pagina, 1)
-    por_pagina = min(max(por_pagina, 1), 100)
+    por_pagina = 10
     total_paginas = max(math.ceil(total_vendas / por_pagina), 1)
     pagina = min(pagina, total_paginas)
     vendas = query.offset((pagina - 1) * por_pagina).limit(por_pagina).all()

@@ -48,11 +48,8 @@ def listar_produtos(
     request: Request,
     busca: str = "",
     categoria_id: int = 0,
-    variacao: str = "",
-    ordenar_por: str = "nome",
-    direcao: str = "asc",
+    possui_variacao: str = "",
     pagina: int = 1,
-    por_pagina: int = 10,
     db: Session = Depends(get_db),
     usuario=Depends(get_usuario_logado)
 ):
@@ -73,32 +70,21 @@ def listar_produtos(
             Produto.categoria_id == categoria_id
         )
 
-    if variacao:
-        query = query.filter(Produto.variacao == variacao)
+    possui_variacao = possui_variacao if possui_variacao in ("sim", "nao") else ""
+    if possui_variacao == "sim":
+        query = query.filter(Produto.variacao.isnot(None), Produto.variacao != "")
+    elif possui_variacao == "nao":
+        query = query.filter((Produto.variacao.is_(None)) | (Produto.variacao == ""))
 
     # Ordenação
-    ordenacoes = {
-        "nome": Produto.nome,
-        "categoria": Categoria.nome,
-        "preco": Produto.preco,
-        "estoque": Produto.estoque_atual,
-    }
-    ordenar_por = ordenar_por if ordenar_por in ordenacoes else "nome"
-    direcao = direcao if direcao in ("asc", "desc") else "asc"
-    if ordenar_por == "categoria":
-        query = query.outerjoin(Categoria)
-    coluna_ordenacao = ordenacoes[ordenar_por]
-    query = query.order_by(
-        coluna_ordenacao.desc() if direcao == "desc" else coluna_ordenacao.asc(),
-        Produto.id.asc(),
-    )
+    query = query.order_by(Produto.nome.asc(), Produto.id.asc())
 
     # Total de produtos encontrados
     total_produtos = query.count()
 
     # Garante valores válidos para paginação
     pagina = max(pagina, 1)
-    por_pagina = max(por_pagina, 1)
+    por_pagina = 10
 
     # Calcula quantidade de páginas
     total_paginas = (
@@ -128,12 +114,6 @@ def listar_produtos(
         .filter(Categoria.ativo == True)
         .all()
     )
-    variacoes = [
-        valor for (valor,) in db.query(Produto.variacao)
-        .filter(Produto.ativo == True, Produto.variacao.isnot(None), Produto.variacao != "")
-        .distinct().order_by(Produto.variacao).all()
-    ]
-
     # Renderiza a página
     return templates.TemplateResponse(
         request,
@@ -145,10 +125,7 @@ def listar_produtos(
             "categorias": categorias,
             "busca": busca,
             "categoria_id": categoria_id,
-            "variacao": variacao,
-            "variacoes": variacoes,
-            "ordenar_por": ordenar_por,
-            "direcao": direcao,
+            "possui_variacao": possui_variacao,
 
             # Paginação
             "pagina": pagina,
@@ -197,6 +174,7 @@ async def criar_produto(
     nome: str = Form(...),
     preco: float = Form(...),
     estoque_atual: int = Form(...),
+    possui_variacao: str = Form("nao"),
     variacao: str = Form(""),
     categoria_id: int = Form(0),
     imagem: UploadFile = File(None),
@@ -227,6 +205,8 @@ async def criar_produto(
                     "nome": nome,
                     "preco": preco,
                     "estoque_atual": estoque_atual,
+                    "possui_variacao": possui_variacao,
+                    "variacao": variacao,
                     "categoria_id": categoria_id,
                 },
             },
@@ -241,7 +221,7 @@ async def criar_produto(
         nome=nome,
         preco=preco,
         estoque_atual=estoque_atual,
-        variacao=variacao.strip() or None,
+        variacao=variacao.strip() if possui_variacao == "sim" else None,
         categoria_id=categoria_id or None,
         imagem_path=imagem_path,
     )
@@ -344,6 +324,7 @@ async def editar_produto(
     nome: str = Form(...),
     preco: float = Form(...),
     estoque_atual: int = Form(...),
+    possui_variacao: str = Form("nao"),
     variacao: str = Form(""),
     categoria_id: int = Form(0),
     imagem: UploadFile = File(None),
@@ -407,7 +388,7 @@ async def editar_produto(
     editando.nome = nome
     editando.preco = preco
     editando.estoque_atual = estoque_atual
-    editando.variacao = variacao.strip() or None
+    editando.variacao = variacao.strip() if possui_variacao == "sim" else None
     editando.categoria_id = categoria_id or None
 
     db.commit()

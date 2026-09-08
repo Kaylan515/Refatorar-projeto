@@ -8,8 +8,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,1,0&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/dashboard.css">
+    <script src="/static/js/ui.js" defer></script>
 </head>
-<body>
+<body data-role="{{ usuario.role }}">
 
 <div class="layout">
 
@@ -32,19 +33,23 @@
             <a href="/produtos" class="nav-link">
                 <span class="icon">📦</span> Produtos
             </a>
+            {% if usuario.role == 'admin' %}
             <a href="/categorias" class="nav-link">
                 <span class="icon">🏷</span> Categorias
             </a>
             <a href="/movimentacoes" class="nav-link">
                 <span class="icon">↕</span> Movimentações
             </a>
+            {% endif %}
             <a href="/armarios" class="nav-link">
                 <span class="icon">🔒</span> Armários
             </a>
 
+            {% if usuario.role == 'admin' %}
             <a href="/clientes" class="nav-link">
                 <span class="icon">Clientes</span> Clientes
             </a>
+            {% endif %}
             <a href="/pdv" class="nav-link">
                 <span class="icon">PDV</span> Ponto de venda
             </a>
@@ -85,6 +90,12 @@
             <h1>{{ usuario.nome.split()[0] }}</h1>
         </div>
 
+        <section class="dashboard-hero">
+            <div>
+                <span class="hero-kicker">PAINEL OPERACIONAL</span>
+            </div>
+        </section>
+
         <!-- CARDS DE RESUMO -->
         <div class="cards-grid">
 
@@ -95,7 +106,7 @@
                 <div class="card-link">Ver todos →</div>
             </a>
 
-            <a href="/categorias" class="card green fade-in">
+            <a href="/categorias" class="card green fade-in admin-only">
                 <span class="card-icon">🏷</span>
                 <div class="card-value">{{ total_categorias }}</div>
                 <div class="card-label">Categorias</div>
@@ -118,7 +129,7 @@
                 <div class="card-link">Ver produtos →</div>
             </a>
 
-            <a href="/clientes" class="card blue fade-in">
+            <a href="/clientes" class="card blue fade-in admin-only">
                 <span class="card-icon">Clientes</span>
                 <div class="card-value">{{ total_clientes }}</div>
                 <div class="card-label">Clientes ativos</div>
@@ -137,7 +148,7 @@
         <div class="bottom-grid">
 
             <!-- Movimentações recentes -->
-            <div class="section">
+            <div class="section admin-only">
                 <div class="section-header">
                     <span class="section-title">Movimentações recentes</span>
                     <a href="/movimentacoes" class="section-link">Ver todas →</a>

@@ -78,11 +78,13 @@
         <!-- Seleção de cliente -->
         <div class="cliente-section">
             <label>Cliente</label>
+            {#
             <div class="cliente-filtros" role="group" aria-label="Tipo de cliente">
                 <button type="button" class="cliente-filtro ativo" data-filtro-cliente="todos">Todos</button>
                 <button type="button" class="cliente-filtro" data-filtro-cliente="associados">Associados</button>
                 <button type="button" class="cliente-filtro" data-filtro-cliente="nao-associados">Não associados</button>
             </div>
+            #}
             <select class="cliente-select"
                     id="select-cliente"
                     onchange="atualizarCliente(this)">
@@ -181,10 +183,12 @@ function adicionarAoCarrinho(card) {
 
     const existente = carrinho.find(i => i.produto_id === id);
 
+    if (!Number.isFinite(preco) || estoque <= 0) return;
+
     if (existente) {
         // Produto já está no carrinho — aumenta a quantidade se tiver estoque
         if (existente.quantidade < existente.estoque_max) {
-            existente.quantidade++;
+            existente.quantidade = Math.min(existente.quantidade + 1, existente.estoque_max);
         } else {
             alert(`Estoque máximo atingido: ${existente.estoque_max} unidade(s).`);
             return;
@@ -235,8 +239,8 @@ function atualizarCliente(select) {
     const badge = document.getElementById('badge-desconto');
     badge.style.display = clienteAtual.associado ? 'inline-flex' : 'none';
 
-    // Recalcula os totais com o novo desconto
-    renderizarTotais();
+    // Atualiza os itens e os totais com o desconto do associado.
+    renderizarCarrinho();
 }
 
 document.querySelectorAll('[data-filtro-cliente]').forEach(botao => {
@@ -351,6 +355,7 @@ function renderizarTotais() {
 
 function finalizarVenda() {
     if (carrinho.length === 0) return;
+    if (!window.confirm('Confirmar finalização desta venda?')) return;
 
     // Serializa o carrinho para o campo oculto
     document.getElementById('input-carrinho').value =

@@ -26,7 +26,6 @@ def listar_clientes(
     ordenar_por: str = "nome",
     direcao: str = "asc",
     pagina: int = 1,
-    por_pagina: int = 10,
     db: Session = Depends(get_db),
     admin = Depends(get_admin)
 ):
@@ -52,7 +51,7 @@ def listar_clientes(
 
     total_clientes = query.count()
     pagina = max(pagina, 1)
-    por_pagina = min(max(por_pagina, 1), 100)
+    por_pagina = 10
     total_paginas = max(math.ceil(total_clientes / por_pagina), 1)
     pagina = min(pagina, total_paginas)
     clientes = query.offset((pagina - 1) * por_pagina).limit(por_pagina).all()

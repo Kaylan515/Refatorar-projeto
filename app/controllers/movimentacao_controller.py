@@ -38,7 +38,6 @@ def listar_movimentacoes(
     ordenar_por: str = "data",
     direcao: str = "desc",
     pagina: int = 1,
-    por_pagina: int = 10,
     db: Session = Depends(get_db),
     admin = Depends(get_admin)
 ):
@@ -67,7 +66,7 @@ def listar_movimentacoes(
     query = query.order_by(coluna_ordenacao.desc() if direcao == "desc" else coluna_ordenacao.asc(), Movimentacao.id.desc())
     total_movimentacoes = query.count()
     pagina = max(pagina, 1)
-    por_pagina = min(max(por_pagina, 1), 100)
+    por_pagina = 10
     total_paginas = max(math.ceil(total_movimentacoes / por_pagina), 1)
     pagina = min(pagina, total_paginas)
     movimentacoes = query.offset((pagina - 1) * por_pagina).limit(por_pagina).all()
