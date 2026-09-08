@@ -135,3 +135,26 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
+
+        body {
+            padding: 0;
+            background: linear-gradient(90deg, rgba(16, 12, 12, .93), rgba(16, 12, 12, .52)), url('/static/uploads/camisa-senai.jpg') center/cover fixed;
+        }
+        .welcome-container { max-width: none; min-height: 100vh; width: 100%; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; text-align: left; }
+        .welcome-container > :not(.welcome-hero) { display: none; }
+        .welcome-hero { min-height: 100vh; display: flex; flex-direction: column; padding: clamp(24px, 5vw, 72px); }
+        .welcome-nav { display: flex; justify-content: space-between; align-items: center; gap: 18px; color: #fff; font-size: .84rem; letter-spacing: .05em; }
+        .welcome-nav strong { padding: 9px 14px; background: #e30613; font-size: 1.25rem; letter-spacing: .08em; }
+        .hero-copy { max-width: 680px; margin: auto 0; }
+        .hero-copy h1 { max-width: 650px; font-size: clamp(2.4rem, 6vw, 5.2rem); line-height: 1.02; margin: 14px 0 22px; }
+        .hero-copy > p { max-width: 580px; color: #f1e9e7; font-size: clamp(1rem, 2vw, 1.2rem); }
+        .eyebrow { color: #ff6b75 !important; font-size: .78rem !important; font-weight: 800; letter-spacing: .15em; }
+        .button-group { flex-direction: row; align-items: center; margin-top: 28px; }
+        .btn-primary { width: auto; display: inline-flex; }
+        .access-note { color: #ddd1cd; font-size: .88rem; }
+        .welcome-stats { display: none; }
+        .welcome-stats div { padding: 18px; background: rgba(24,19,18,.75); }
+        .welcome-stats strong, .welcome-stats span { display: block; }
+        .welcome-stats strong { color: #fff; font-size: 1.1rem; }
+        .welcome-stats span { color: #d7c8c4; margin-top: 5px; font-size: .86rem; }
+        @media (max-width: 640px) { .welcome-nav { align-items: flex-start; flex-direction: column; } .button-group { align-items: flex-start; flex-direction: column; } }

@@ -1,0 +1,22 @@
+.locker-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 16px !important;
+    margin-top: 24px !important;
+}
+.locker-grid > div {
+    width: auto !important;
+    min-height: 205px;
+    padding: 20px !important;
+    border: 1px solid #443633 !important;
+    border-radius: 14px !important;
+    background: linear-gradient(145deg, #2d2422, #211b1a) !important;
+    box-shadow: 0 12px 24px rgba(0,0,0,.16);
+    transition: transform .2s ease, border-color .2s ease;
+}
+.locker-grid > div:hover { transform: translateY(-4px); border-color: #ff4b5f !important; }
+.locker-grid strong { color: #fff; letter-spacing: .04em; }
+.locker-grid small { color: #c4b8b5 !important; line-height: 1.6; }
+.locker-grid span { display: inline-flex; padding: 5px 9px; border-radius: 999px; font-size: .78rem; font-weight: 700; background: rgba(255,255,255,.08); }
+.locker-grid a { display: inline-flex; margin-top: 4px; }
+@media (max-width: 620px) { .locker-grid { grid-template-columns: 1fr; } }

@@ -49,6 +49,14 @@
         <br>
 
         <label>Tamanho ou variacao:
+            <span>O produto possui variação?
+                <select name="possui_variacao" id="possui-variacao">
+                    <option value="nao" {{ 'selected' if not (editando and editando.variacao) else '' }}>Não</option>
+                    <option value="sim" {{ 'selected' if (editando and editando.variacao) or (valores and valores.possui_variacao == 'sim') else '' }}>Sim</option>
+                </select>
+            </span>
+            <br>
+            <span id="detalhe-variacao">Detalhe:
             <input type="text" name="variacao" list="variacoes-sugeridas"
                    placeholder="Ex.: M, GG, HB, 2B ou Azul"
                    value="{{ editando.variacao if editando else (valores.variacao if valores else '') }}">
@@ -56,6 +64,7 @@
                 <option value="Unico"><option value="P"><option value="M"><option value="G"><option value="GG">
                 <option value="HB"><option value="2B"><option value="4B">
             </datalist>
+            </span>
         </label>
         <br>
 
@@ -94,5 +103,14 @@
         </button>
         <a href="/produtos">Cancelar</a>
     </form>
+    <script>
+        const seletorVariacao = document.getElementById('possui-variacao');
+        const detalheVariacao = document.getElementById('detalhe-variacao');
+        const atualizarCampoVariacao = () => {
+            detalheVariacao.style.display = seletorVariacao.value === 'sim' ? '' : 'none';
+        };
+        seletorVariacao.addEventListener('change', atualizarCampoVariacao);
+        atualizarCampoVariacao();
+    </script>
 </body>
 </html>

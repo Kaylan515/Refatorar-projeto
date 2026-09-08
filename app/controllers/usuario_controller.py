@@ -35,7 +35,6 @@ def listar_usuarios(
     ordenar_por: str = "nome",
     direcao: str = "asc",
     pagina: int = 1,
-    por_pagina: int = 10,
     db: Session = Depends(get_db),
     admin = Depends(get_admin)  # bloqueia quem não é admin
 ):
@@ -56,7 +55,7 @@ def listar_usuarios(
     query = query.order_by(coluna_ordenacao.desc() if direcao == "desc" else coluna_ordenacao.asc(), Usuario.id.asc())
     total_usuarios = query.count()
     pagina = max(pagina, 1)
-    por_pagina = min(max(por_pagina, 1), 100)
+    por_pagina = 10
     total_paginas = max(math.ceil(total_usuarios / por_pagina), 1)
     pagina = min(pagina, total_paginas)
     usuarios = query.offset((pagina - 1) * por_pagina).limit(por_pagina).all()
