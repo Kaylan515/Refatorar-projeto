@@ -1,30 +1,28 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>Alugar Armário {{ armario.numero }} — AAPM SENAI</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% include "_aapm_styles.html" %}
 </head>
+
 <body>
     <h1>Alugar armário {{ armario.numero }}</h1>
 
     {% if armario.localizacao %}
-        <p style="color:gray">{{ armario.localizacao }}</p>
+    <p style="color:gray">{{ armario.localizacao }}</p>
     {% endif %}
 
     {% if erro %}
-        <p style="color:red">{{ erro }}</p>
+    <p style="color:red">{{ erro }}</p>
     {% endif %}
 
     <form action="/armarios/{{ armario.id }}/alugar" method="post">
 
         <label>Nome do locatário:
-            <input type="text"
-                   name="locatario_nome"
-                   placeholder="Nome completo do aluno"
-                   required
-                   autofocus>
+            <input type="text" name="locatario_nome" placeholder="Nome completo do aluno" required autofocus>
         </label>
         <br>
 
@@ -33,11 +31,7 @@
                 Lista os semestres mais prováveis dinamicamente.
                 O admin pode digitar outro valor se necessário.
             -->
-            <input type="text"
-                   name="semestre"
-                   placeholder="Ex: 2025.1"
-                   list="semestres-sugeridos"
-                   required>
+            <input type="text" name="semestre" placeholder="Ex: 2025.1" list="semestres-sugeridos" required>
             <datalist id="semestres-sugeridos">
                 <option value="2025.1">
                 <option value="2025.2">
@@ -48,10 +42,7 @@
         <br>
 
         <label>Observação (opcional):
-            <input type="text"
-                   name="observacao"
-                   maxlength="255"
-                   placeholder="Ex: Chave reserva na portaria">
+            <input type="text" name="observacao" maxlength="255" placeholder="Ex: Chave reserva na portaria">
         </label>
         <br>
 
@@ -59,4 +50,5 @@
         <a href="/armarios/{{ armario.id }}">Cancelar</a>
     </form>
 </body>
+
 </html>

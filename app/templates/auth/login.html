@@ -1,45 +1,48 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>Login — Estoque</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% include "_aapm_styles.html" %}
 </head>
+
 <body class="auth-page">
     <main class="auth-card">
-    <h1>Entrar no sistema</h1>
+        <h1>Entrar no sistema</h1>
 
-    <!-- Exibe mensagem de erro se existir -->
-    {% if erro %}
+        <!-- Exibe mensagem de erro se existir -->
+        {% if erro %}
         <p style="color: red;">{{ erro }}</p>
-    {% endif %}
+        {% endif %}
 
-    <!-- Exibe confirmação após registro -->
-    {% if request.query_params.get('cadastro') == 'ok' %}
+        <!-- Exibe confirmação após registro -->
+        {% if request.query_params.get('cadastro') == 'ok' %}
         <p style="color: green;">Cadastro realizado! Faça login.</p>
-    {% endif %}
-    {% if request.query_params.get('mensagem') == 'cadastro_restrito' %}
+        {% endif %}
+        {% if request.query_params.get('mensagem') == 'cadastro_restrito' %}
         <p>Os usuários são cadastrados pelo administrador.</p>
-    {% endif %}
+        {% endif %}
 
-    <!--
+        <!--
         action="/auth/login" → envia para nosso endpoint POST
         method="post"        → dados no corpo da requisição (não na URL)
     -->
-    <form action="/auth/login" method="post">
-        <label>E-mail:
-            <input type="email" name="email" required>
-        </label>
-        <br>
-        <label>Senha:
-            <input type="password" name="senha" required>
-        </label>
-        <br>
-        <button type="submit">Entrar</button>
-    </form>
+        <form action="/auth/login" method="post">
+            <label>E-mail:
+                <input type="email" name="email" required>
+            </label>
+            <br>
+            <label>Senha:
+                <input type="password" name="senha" required>
+            </label>
+            <br>
+            <button type="submit">Entrar</button>
+        </form>
 
-    <p><a href="/">← Voltar à página inicial</a></p>
+        <p><a href="/">← Voltar à página inicial</a></p>
     </main>
 </body>
+
 </html>

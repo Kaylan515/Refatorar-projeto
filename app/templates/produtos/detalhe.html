@@ -1,20 +1,19 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>{{ produto.nome }} — AAPM SENAI</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% include "_aapm_styles.html" %}
 </head>
+
 <body>
     {% if request.query_params.get('editado') == 'ok' %}
-        <p style="color:green">Produto atualizado com sucesso!</p>
+    <p style="color:green">Produto atualizado com sucesso!</p>
     {% endif %}
 
-    <img src="{{ produto.imagem_url }}"
-         alt="{{ produto.nome }}"
-         width="200"
-         style="object-fit:cover">
+    <img src="{{ produto.imagem_url }}" alt="{{ produto.nome }}" width="200" style="object-fit:cover">
 
     <h1>{{ produto.nome }}</h1>
 
@@ -23,14 +22,18 @@
     {% if produto.variacao %}<p>Tamanho ou variacao: <strong>{{ produto.variacao }}</strong></p>{% endif %}
 
     <table border="1" cellpadding="8">
-        <tr><td><strong>Preço</strong></td>
-            <td>R$ {{ "%.2f"|format(produto.preco) }}</td></tr>
-        <tr><td><strong>Estoque atual</strong></td>
-            <td>{{ produto.estoque_atual }}</td></tr>
+        <tr>
+            <td><strong>Preço</strong></td>
+            <td>R$ {{ "%.2f"|format(produto.preco) }}</td>
+        </tr>
+        <tr>
+            <td><strong>Estoque atual</strong></td>
+            <td>{{ produto.estoque_atual }}</td>
+        </tr>
     </table>
 
     {% if request.query_params.get('movimentacao') == 'ok' %}
-        <p style="color:green">Movimentação registrada com sucesso!</p>
+    <p style="color:green">Movimentação registrada com sucesso!</p>
     {% endif %}
 
     <!-- Links de movimentação -->
@@ -43,9 +46,10 @@
     </a>
 
     {% if usuario.role == 'admin' %}
-        <a href="/produtos/{{ produto.id }}/editar">Editar</a>
+    <a href="/produtos/{{ produto.id }}/editar">Editar</a>
     {% endif %}
 
     <a href="/produtos">← Voltar</a>
 </body>
+
 </html>

@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>Nova Movimentação — AAPM SENAI</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% include "_aapm_styles.html" %}
 </head>
+
 <body>
     <h1>Registrar movimentação</h1>
 
     {% if erro %}
-        <p style="color:red">{{ erro }}</p>
+    <p style="color:red">{{ erro }}</p>
     {% endif %}
 
     <form action="/movimentacoes/nova" method="post">
@@ -19,12 +21,10 @@
             <select name="produto_id" required id="select-produto">
                 <option value="">Selecione...</option>
                 {% for p in produtos %}
-                    <option value="{{ p.id }}"
-                            data-estoque="{{ p.estoque_atual }}"
-                            data-preco="{{ p.preco }}"
-                        {{ 'selected' if produto_id == p.id else '' }}>
-                        {{ p.nome }} — estoque: {{ p.estoque_atual }}
-                    </option>
+                <option value="{{ p.id }}" data-estoque="{{ p.estoque_atual }}" data-preco="{{ p.preco }}" {{ 'selected'
+                    if produto_id==p.id else '' }}>
+                    {{ p.nome }} — estoque: {{ p.estoque_atual }}
+                </option>
                 {% endfor %}
             </select>
         </label>
@@ -43,30 +43,21 @@
             <select name="tipo" required id="select-tipo">
                 <option value="">Selecione...</option>
                 {% for t in tipos %}
-                    <option value="{{ t.value }}">
-                        {{ "▲ Entrada" if t.value == 'entrada' else "▼ Saída" }}
-                    </option>
+                <option value="{{ t.value }}">
+                    {{ "▲ Entrada" if t.value == 'entrada' else "▼ Saída" }}
+                </option>
                 {% endfor %}
             </select>
         </label>
         <br>
 
         <label>Quantidade:
-            <input type="number"
-                   name="quantidade"
-                   min="1"
-                   required
-                   id="input-quantidade">
+            <input type="number" name="quantidade" min="1" required id="input-quantidade">
         </label>
         <br>
 
         <label>Preço unitário (R$):
-            <input type="number"
-                   name="preco_unitario"
-                   step="0.01"
-                   min="0"
-                   required
-                   id="input-preco">
+            <input type="number" name="preco_unitario" step="0.01" min="0" required id="input-preco">
         </label>
         <br>
 
@@ -77,10 +68,7 @@
         <br>
 
         <label>Observação (opcional):
-            <input type="text"
-                   name="observacao"
-                   maxlength="255"
-                   placeholder="Ex: Compra fornecedor X, Venda balcão...">
+            <input type="text" name="observacao" maxlength="255" placeholder="Ex: Compra fornecedor X, Venda balcão...">
         </label>
         <br>
 
@@ -89,19 +77,19 @@
     </form>
 
     <script>
-        const selectProduto  = document.getElementById('select-produto');
+        const selectProduto = document.getElementById('select-produto');
         const inputQuantidade = document.getElementById('input-quantidade');
-        const inputPreco     = document.getElementById('input-preco');
-        const infoEstoque    = document.getElementById('info-estoque');
-        const valorEstoque   = document.getElementById('valor-estoque');
-        const infoSubtotal   = document.getElementById('info-subtotal');
-        const valorSubtotal  = document.getElementById('valor-subtotal');
+        const inputPreco = document.getElementById('input-preco');
+        const infoEstoque = document.getElementById('info-estoque');
+        const valorEstoque = document.getElementById('valor-estoque');
+        const infoSubtotal = document.getElementById('info-subtotal');
+        const valorSubtotal = document.getElementById('valor-subtotal');
 
         // Ao selecionar produto: mostra estoque atual e preenche preço
         selectProduto.addEventListener('change', function () {
             const option = this.options[this.selectedIndex];
             const estoque = option.dataset.estoque;
-            const preco   = option.dataset.preco;
+            const preco = option.dataset.preco;
 
             if (estoque !== undefined) {
                 valorEstoque.textContent = estoque;
@@ -118,7 +106,7 @@
 
         // Atualiza o subtotal ao digitar quantidade ou preço
         function atualizarSubtotal() {
-            const qtd   = parseFloat(inputQuantidade.value) || 0;
+            const qtd = parseFloat(inputQuantidade.value) || 0;
             const preco = parseFloat(inputPreco.value) || 0;
             const total = qtd * preco;
 
@@ -137,4 +125,5 @@
         inputPreco.addEventListener('input', atualizarSubtotal);
     </script>
 </body>
+
 </html>
