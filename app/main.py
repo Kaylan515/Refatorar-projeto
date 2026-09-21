@@ -37,6 +37,11 @@ templates = Jinja2Templates(directory="app/templates")
 
 @app.exception_handler(StarletteHTTPException)
 async def pagina_http_erro(request: Request, exc: StarletteHTTPException):
+    if exc.status_code == 401:
+        return RedirectResponse(
+            url="/auth/login?mensagem=sessao_expirada",
+            status_code=303
+        )
     if exc.status_code == 404:
         return templates.TemplateResponse(request, "erro.html", {"request": request, "codigo": 404, "titulo": "Pagina nao encontrada", "mensagem": "O endereco acessado nao esta disponivel ou foi movido."}, status_code=404)
     return templates.TemplateResponse(request, "erro.html", {"request": request, "codigo": exc.status_code, "titulo": "Acesso indisponivel", "mensagem": "Nao foi possivel concluir esta solicitacao."}, status_code=exc.status_code)

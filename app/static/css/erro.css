@@ -1,5 +1,83 @@
-body { display: grid; place-items: center; }
-        .error-card { width: min(100%, 620px); padding: clamp(2rem, 7vw, 4.5rem); text-align: center; background: #211b1a; border: 1px solid #443633; border-radius: 1.25rem; box-shadow: 0 25px 60px rgba(0,0,0,.3); }
-        .error-code { color: #ff4b5f; font: 800 clamp(4rem, 14vw, 8rem)/1 'Space Grotesk', sans-serif; letter-spacing: -.08em; }
-        .error-card h1 { margin: .8rem 0; }
-        .error-card p { max-width: 42ch; margin: 0 auto 1.5rem; }
+/* Proteção contra elementos antigos perdidos no topo */
+body > *:not(.spotlight):not(.page-wrapper):not(script) {
+    display: none !important;
+}
+
+/* Impede que textos soltos fora da estrutura da página apareçam no topo. */
+body {
+    font-size: 0;
+}
+
+.error-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 100vh;
+    font-size: 1rem;
+}
+
+.error-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.75rem;
+    max-width: 750px;
+    margin: auto 0;
+    padding: 3rem 0;
+    position: relative;
+    z-index: 2;
+}
+
+.error-code-badge {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    line-height: 1;
+    background: rgba(217, 119, 6, 0.1);
+    border: 1px solid rgba(217, 119, 6, 0.3);
+    padding: 0.8rem 1.75rem;
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    letter-spacing: -1px;
+    font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+}
+
+.error-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.error-copy h1 {
+    font-size: clamp(2rem, 3.5vw, 2.75rem);
+    font-weight: 700;
+    color: var(--text-main);
+    letter-spacing: -0.5px;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.error-copy p {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.button-group {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .error-code-badge {
+        font-size: 2.75rem;
+        padding: 0.6rem 1.25rem;
+    }
+    
+    .error-copy h1 {
+        font-size: 1.75rem;
+    }
+}

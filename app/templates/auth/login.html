@@ -21,6 +21,9 @@
         {% if request.query_params.get('cadastro') == 'ok' %}
         <p style="color: green;">Cadastro realizado! Faça login.</p>
         {% endif %}
+        {% if request.query_params.get('mensagem') == 'sessao_expirada' %}
+        <p>Sua sessão expirou. Entre novamente para continuar.</p>
+        {% endif %}
         {% if request.query_params.get('mensagem') == 'cadastro_restrito' %}
         <p>Os usuários são cadastrados pelo administrador.</p>
         {% endif %}
