@@ -5,124 +5,84 @@
     <meta charset="UTF-8">
     <title>Nova Movimentação — AAPM SENAI</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/movimentacoes/form.css">
+    <script src="/static/js/movimentacoes/form.js" defer></script>
 </head>
 
 <body>
-    <h1>Registrar movimentação</h1>
+    <div class="form-container">
+        <header class="form-header">
+            <h1>📦 Registrar movimentação</h1>
+            <p>Adicione entradas ou saídas de stock manualmente</p>
+        </header>
 
-    {% if erro %}
-    <p style="color:red">{{ erro }}</p>
-    {% endif %}
+        {% if erro %}
+        <div class="alerta">
+            {{ erro }}
+        </div>
+        {% endif %}
 
-    <form action="/movimentacoes/nova" method="post">
+        <form action="/movimentacoes/nova" method="post" class="mov-form">
 
-        <label>Produto:
-            <select name="produto_id" required id="select-produto">
-                <option value="">Selecione...</option>
-                {% for p in produtos %}
-                <option value="{{ p.id }}" data-estoque="{{ p.estoque_atual }}" data-preco="{{ p.preco }}" {{ 'selected'
-                    if produto_id==p.id else '' }}>
-                    {{ p.nome }} — estoque: {{ p.estoque_atual }}
-                </option>
-                {% endfor %}
-            </select>
-        </label>
-        <br>
+            <div class="input-group">
+                <label for="select-produto">Produto</label>
+                <select name="produto_id" required id="select-produto" class="form-control">
+                    <option value="">Selecione um produto...</option>
+                    {% for p in produtos %}
+                    <option value="{{ p.id }}" data-estoque="{{ p.estoque_atual }}" data-preco="{{ p.preco }}"
+                        {{ 'selected' if produto_id==p.id else '' }}>
+                        {{ p.nome }} — estoque: {{ p.estoque_atual }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
 
-        <!--
-            Exibe o estoque atual do produto selecionado
-            para o usuário não precisar adivinhar o saldo.
-        -->
-        <p id="info-estoque" style="color:gray;display:none">
-            Estoque atual: <strong id="valor-estoque">0</strong>
-        </p>
-        <br>
+            <div id="info-estoque" class="info-box" style="display:none">
+                Estoque atual: <strong id="valor-estoque">0</strong> unidade(s)
+            </div>
 
-        <label>Tipo:
-            <select name="tipo" required id="select-tipo">
-                <option value="">Selecione...</option>
-                {% for t in tipos %}
-                <option value="{{ t.value }}">
-                    {{ "▲ Entrada" if t.value == 'entrada' else "▼ Saída" }}
-                </option>
-                {% endfor %}
-            </select>
-        </label>
-        <br>
+            <div class="input-group">
+                <label for="select-tipo">Tipo de Movimentação</label>
+                <select name="tipo" required id="select-tipo" class="form-control">
+                    <option value="">Selecione o tipo...</option>
+                    {% for t in tipos %}
+                    <option value="{{ t.value }}">
+                        {{ "▲ Entrada" if t.value == 'entrada' else "▼ Saída" }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
 
-        <label>Quantidade:
-            <input type="number" name="quantidade" min="1" required id="input-quantidade">
-        </label>
-        <br>
+            <div class="form-row">
+                <div class="input-group">
+                    <label for="input-quantidade">Quantidade</label>
+                    <input type="number" name="quantidade" min="1" required id="input-quantidade" class="form-control"
+                        placeholder="Ex: 10">
+                </div>
 
-        <label>Preço unitário (R$):
-            <input type="number" name="preco_unitario" step="0.01" min="0" required id="input-preco">
-        </label>
-        <br>
+                <div class="input-group">
+                    <label for="input-preco">Preço unitário (R$)</label>
+                    <input type="number" name="preco_unitario" step="0.01" min="0" required id="input-preco"
+                        class="form-control" placeholder="0,00">
+                </div>
+            </div>
 
-        <!-- Subtotal calculado em tempo real via JS -->
-        <p id="info-subtotal" style="display:none">
-            Subtotal: <strong id="valor-subtotal">R$ 0,00</strong>
-        </p>
-        <br>
+            <div id="info-subtotal" class="subtotal-box" style="display:none">
+                Subtotal estimado: <strong id="valor-subtotal">R$ 0,00</strong>
+            </div>
 
-        <label>Observação (opcional):
-            <input type="text" name="observacao" maxlength="255" placeholder="Ex: Compra fornecedor X, Venda balcão...">
-        </label>
-        <br>
+            <div class="input-group">
+                <label for="input-obs">Observação (opcional)</label>
+                <input type="text" name="observacao" maxlength="255" id="input-obs" class="form-control"
+                    placeholder="Ex: Compra fornecedor X, Venda balcão...">
+            </div>
 
-        <button type="submit">Registrar</button>
-        <a href="/movimentacoes">Cancelar</a>
-    </form>
-
-    <script>
-        const selectProduto = document.getElementById('select-produto');
-        const inputQuantidade = document.getElementById('input-quantidade');
-        const inputPreco = document.getElementById('input-preco');
-        const infoEstoque = document.getElementById('info-estoque');
-        const valorEstoque = document.getElementById('valor-estoque');
-        const infoSubtotal = document.getElementById('info-subtotal');
-        const valorSubtotal = document.getElementById('valor-subtotal');
-
-        // Ao selecionar produto: mostra estoque atual e preenche preço
-        selectProduto.addEventListener('change', function () {
-            const option = this.options[this.selectedIndex];
-            const estoque = option.dataset.estoque;
-            const preco = option.dataset.preco;
-
-            if (estoque !== undefined) {
-                valorEstoque.textContent = estoque;
-                infoEstoque.style.display = 'block';
-
-                // Pré-preenche o preço unitário com o preço cadastrado
-                inputPreco.value = parseFloat(preco).toFixed(2);
-            } else {
-                infoEstoque.style.display = 'none';
-            }
-
-            atualizarSubtotal();
-        });
-
-        // Atualiza o subtotal ao digitar quantidade ou preço
-        function atualizarSubtotal() {
-            const qtd = parseFloat(inputQuantidade.value) || 0;
-            const preco = parseFloat(inputPreco.value) || 0;
-            const total = qtd * preco;
-
-            if (qtd > 0 && preco > 0) {
-                valorSubtotal.textContent = total.toLocaleString('pt-BR', {
-                    style: 'currency',
-                    currency: 'BRL'
-                });
-                infoSubtotal.style.display = 'block';
-            } else {
-                infoSubtotal.style.display = 'none';
-            }
-        }
-
-        inputQuantidade.addEventListener('input', atualizarSubtotal);
-        inputPreco.addEventListener('input', atualizarSubtotal);
-    </script>
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">Registrar</button>
+                <a href="/movimentacoes" class="btn-cancel">Cancelar</a>
+            </div>
+        </form>
+    </div>
 </body>
 
 </html>
