@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>Histórico — {{ produto.nome }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% include "_aapm_styles.html" %}
 </head>
+
 <body>
     <h1>Histórico — {{ produto.nome }}</h1>
 
@@ -49,9 +51,9 @@
                 <td>{{ m.criado_em.strftime('%d/%m/%Y %H:%M') }}</td>
                 <td>
                     {% if m.tipo.value == 'entrada' %}
-                        <span style="color:green">▲ Entrada</span>
+                    <span style="color:green">▲ Entrada</span>
                     {% else %}
-                        <span style="color:red">▼ Saída</span>
+                    <span style="color:red">▼ Saída</span>
                     {% endif %}
                 </td>
                 <td>{{ m.quantidade }}</td>
@@ -76,4 +78,5 @@
         <a href="/produtos/{{ produto.id }}">← Voltar ao produto</a>
     </p>
 </body>
+
 </html>

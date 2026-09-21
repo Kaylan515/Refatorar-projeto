@@ -1,300 +1,286 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDV — AAPM SENAI</title>
     <link rel="stylesheet" href="/static/css/pdv/index.css">
 </head>
+
 <body>
 
-<!-- ── TOPO ── -->
-<header class="topbar">
-    <span class="topbar-title">🏪 PDV — AAPM SENAI</span>
-    <nav class="topbar-links">
-        <a href="/pdv/historico">Histórico de vendas</a>
-        <a href="/pdv/extrato">Extrato</a>
-        <a href="/clientes">Clientes</a>
-        <a href="/">Dashboard</a>
-    </nav>
-</header>
+    <!-- ── TOPO ── -->
+    <header class="topbar">
+        <span class="topbar-title">🏪 PDV — AAPM SENAI</span>
+        <nav class="topbar-links">
+            <a href="/pdv/historico">Histórico de vendas</a>
+            <a href="/pdv/extrato">Extrato</a>
+            <a href="/clientes">Clientes</a>
+            <a href="/">Dashboard</a>
+        </nav>
+    </header>
 
-<!-- ── Alertas vindos da query string ── -->
-{% set erro = request.query_params.get('erro') %}
-{% if erro %}
-<div class="alerta">
-    {% if erro == 'vazio' %}Carrinho vazio. Adicione produtos antes de finalizar.
-    {% elif erro == 'estoque' %}Estoque insuficiente para: {{ request.query_params.get('produto') }}
-    {% elif erro == 'quantidade' %}Quantidade inválida.
-    {% else %}Ocorreu um erro. Tente novamente.
+    <!-- ── Alertas vindos da query string ── -->
+    {% set erro = request.query_params.get('erro') %}
+    {% if erro %}
+    <div class="alerta">
+        {% if erro == 'vazio' %}Carrinho vazio. Adicione produtos antes de finalizar.
+        {% elif erro == 'estoque' %}Estoque insuficiente para: {{ request.query_params.get('produto') }}
+        {% elif erro == 'quantidade' %}Quantidade inválida.
+        {% else %}Ocorreu um erro. Tente novamente.
+        {% endif %}
+    </div>
     {% endif %}
-</div>
-{% endif %}
 
-<div class="pdv-layout">
+    <div class="pdv-layout">
 
-    <!-- ════════════════════════════════════════
+        <!-- ════════════════════════════════════════
          COLUNA ESQUERDA — Grade de produtos
     ════════════════════════════════════════ -->
-    <section class="produtos-col">
-        <div class="produtos-header">
-            <input class="busca-input"
-                   type="text"
-                   id="busca-produto"
-                   placeholder="🔍 Buscar produto..."
-                   autocomplete="off">
-        </div>
-
-        <div class="produtos-grid" id="grade-produtos">
-            {% for p in produtos %}
-            <div class="produto-card {% if p.estoque_atual == 0 %}sem-estoque{% endif %}"
-                 data-id="{{ p.id }}"
-                 data-nome="{{ p.nome }}"
-                 data-preco="{{ p.preco }}"
-                 data-estoque="{{ p.estoque_atual }}"
-                 data-nome-lower="{{ p.nome.lower() }}"
-                 onclick="adicionarAoCarrinho(this)">
-
-                <img src="{{ p.imagem_url }}" alt="{{ p.nome }}">
-                <div class="produto-card-nome">{{ p.nome }}</div>
-                <div class="produto-card-preco">
-                    R$ {{ "%.2f"|format(p.preco) }}
-                </div>
-                <div class="produto-card-estoque">
-                    Estoque: {{ p.estoque_atual }}
-                </div>
+        <section class="produtos-col">
+            <div class="produtos-header">
+                <input class="busca-input" type="text" id="busca-produto" placeholder="🔍 Buscar produto..."
+                    autocomplete="off">
             </div>
-            {% endfor %}
-        </div>
-    </section>
 
-    <!-- ════════════════════════════════════════
+            <div class="produtos-grid" id="grade-produtos">
+                {% for p in produtos %}
+                <div class="produto-card {% if p.estoque_atual == 0 %}sem-estoque{% endif %}" data-id="{{ p.id }}"
+                    data-nome="{{ p.nome }}" data-preco="{{ p.preco }}" data-estoque="{{ p.estoque_atual }}"
+                    data-nome-lower="{{ p.nome.lower() }}" onclick="adicionarAoCarrinho(this)">
+
+                    <img src="{{ p.imagem_url }}" alt="{{ p.nome }}">
+                    <div class="produto-card-nome">{{ p.nome }}</div>
+                    <div class="produto-card-preco">
+                        R$ {{ "%.2f"|format(p.preco) }}
+                    </div>
+                    <div class="produto-card-estoque">
+                        Estoque: {{ p.estoque_atual }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- ════════════════════════════════════════
          COLUNA DIREITA — Carrinho
     ════════════════════════════════════════ -->
-    <aside class="carrinho-col">
+        <aside class="carrinho-col">
 
-        <div class="carrinho-header">🛒 Carrinho</div>
+            <div class="carrinho-header">🛒 Carrinho</div>
 
-        <!-- Seleção de cliente -->
-        <div class="cliente-section">
-            <label>Cliente</label>
-            {#
-            <div class="cliente-filtros" role="group" aria-label="Tipo de cliente">
-                <button type="button" class="cliente-filtro ativo" data-filtro-cliente="todos">Todos</button>
-                <button type="button" class="cliente-filtro" data-filtro-cliente="associados">Associados</button>
-                <button type="button" class="cliente-filtro" data-filtro-cliente="nao-associados">Não associados</button>
-            </div>
-            #}
-            <select class="cliente-select"
-                    id="select-cliente"
-                    onchange="atualizarCliente(this)">
-                <option value="0" data-associado="false">
-                    Sem identificação (sem desconto)
-                </option>
-                {% for c in clientes %}
-                <option value="{{ c.id }}"
-                        data-associado="{{ 'true' if c.is_associado else 'false' }}">
-                    {{ c.nome }}
-                    {% if c.matricula %}({{ c.matricula }}){% endif %}
-                    {% if c.is_associado %} — ASSOCIADO{% endif %}
-                </option>
-                {% endfor %}
-            </select>
+            <!-- Seleção de cliente -->
+            <div class="cliente-section">
+                <label>Cliente</label>
+                {#
+                <div class="cliente-filtros" role="group" aria-label="Tipo de cliente">
+                    <button type="button" class="cliente-filtro ativo" data-filtro-cliente="todos">Todos</button>
+                    <button type="button" class="cliente-filtro" data-filtro-cliente="associados">Associados</button>
+                    <button type="button" class="cliente-filtro" data-filtro-cliente="nao-associados">Não
+                        associados</button>
+                </div>
+                #}
+                <select class="cliente-select" id="select-cliente" onchange="atualizarCliente(this)">
+                    <option value="0" data-associado="false">
+                        Sem identificação (sem desconto)
+                    </option>
+                    {% for c in clientes %}
+                    <option value="{{ c.id }}" data-associado="{{ 'true' if c.is_associado else 'false' }}">
+                        {{ c.nome }}
+                        {% if c.matricula %}({{ c.matricula }}){% endif %}
+                        {% if c.is_associado %} — ASSOCIADO{% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
 
-            <!--
+                <!--
                 Badge aparece via JS quando um associado é selecionado.
                 desconto_associado vem do template (10.0)
             -->
-            <div class="desconto-badge" id="badge-desconto" style="display:none">
-                ✓ {{ desconto_associado|int }}% de desconto aplicado
-            </div>
-        </div>
-
-        <!-- Lista de itens -->
-        <div class="carrinho-itens" id="lista-carrinho">
-            <div class="carrinho-vazio" id="msg-vazio">
-                <span class="carrinho-vazio-icon">🛒</span>
-                Clique nos produtos para adicionar
-            </div>
-        </div>
-
-        <!-- Totais e finalização -->
-        <div class="carrinho-footer">
-            <div class="totais" id="totais" style="display:none">
-                <div class="total-linha">
-                    <span>Subtotal</span>
-                    <span id="val-subtotal">R$ 0,00</span>
-                </div>
-                <div class="total-linha desconto" id="linha-desconto" style="display:none">
-                    <span id="label-desconto">Desconto (0%)</span>
-                    <span id="val-desconto">— R$ 0,00</span>
-                </div>
-                <div class="total-linha final">
-                    <span>Total</span>
-                    <span id="val-total">R$ 0,00</span>
+                <div class="desconto-badge" id="badge-desconto" style="display:none">
+                    ✓ {{ desconto_associado|int }}% de desconto aplicado
                 </div>
             </div>
 
-            <textarea class="obs-input"
-                      id="obs-input"
-                      rows="2"
-                      placeholder="Observação (opcional)..."></textarea>
+            <!-- Lista de itens -->
+            <div class="carrinho-itens" id="lista-carrinho">
+                <div class="carrinho-vazio" id="msg-vazio">
+                    <span class="carrinho-vazio-icon">🛒</span>
+                    Clique nos produtos para adicionar
+                </div>
+            </div>
 
-            <!--
+            <!-- Totais e finalização -->
+            <div class="carrinho-footer">
+                <div class="totais" id="totais" style="display:none">
+                    <div class="total-linha">
+                        <span>Subtotal</span>
+                        <span id="val-subtotal">R$ 0,00</span>
+                    </div>
+                    <div class="total-linha desconto" id="linha-desconto" style="display:none">
+                        <span id="label-desconto">Desconto (0%)</span>
+                        <span id="val-desconto">— R$ 0,00</span>
+                    </div>
+                    <div class="total-linha final">
+                        <span>Total</span>
+                        <span id="val-total">R$ 0,00</span>
+                    </div>
+                </div>
+
+                <textarea class="obs-input" id="obs-input" rows="2" placeholder="Observação (opcional)..."></textarea>
+
+                <!--
                 O form envia:
                 - carrinho_json: array serializado em JSON pelo JS
                 - cliente_id: id do cliente selecionado (0 = balcão)
                 - observacao: texto livre
             -->
-            <form id="form-venda" action="/pdv/finalizar" method="post">
-                <input type="hidden" name="carrinho_json" id="input-carrinho">
-                <input type="hidden" name="cliente_id"   id="input-cliente-id" value="0">
-                <input type="hidden" name="observacao"   id="input-obs">
-                <button class="btn-finalizar"
-                        id="btn-finalizar"
-                        type="button"
-                        disabled
-                        onclick="finalizarVenda()">
-                    Finalizar venda
-                </button>
-            </form>
-        </div>
-    </aside>
-</div>
+                <form id="form-venda" action="/pdv/finalizar" method="post">
+                    <input type="hidden" name="carrinho_json" id="input-carrinho">
+                    <input type="hidden" name="cliente_id" id="input-cliente-id" value="0">
+                    <input type="hidden" name="observacao" id="input-obs">
+                    <button class="btn-finalizar" id="btn-finalizar" type="button" disabled onclick="finalizarVenda()">
+                        Finalizar venda
+                    </button>
+                </form>
+            </div>
+        </aside>
+    </div>
 
-<script>
-// ============================================================
-// Estado do carrinho — array de objetos
-// ============================================================
-// Cada item: { produto_id, nome, preco, quantidade, estoque_max }
-// ============================================================
+    <script>
+        // ============================================================
+        // Estado do carrinho — array de objetos
+        // ============================================================
+        // Cada item: { produto_id, nome, preco, quantidade, estoque_max }
+        // ============================================================
 
-let carrinho = [];
-let clienteAtual = { id: 0, associado: false };
-const DESCONTO_PCT = {{ desconto_associado }};  // vem do template
+        let carrinho = [];
+        let clienteAtual = { id: 0, associado: false };
+        const DESCONTO_PCT = {{ desconto_associado }};  // vem do template
 
-// ── Adicionar produto ao carrinho ────────────────────────────
+        // ── Adicionar produto ao carrinho ────────────────────────────
 
-function adicionarAoCarrinho(card) {
-    const id       = parseInt(card.dataset.id);
-    const nome     = card.dataset.nome;
-    const preco    = parseFloat(card.dataset.preco);
-    const estoque  = parseInt(card.dataset.estoque);
+        function adicionarAoCarrinho(card) {
+            const id = parseInt(card.dataset.id);
+            const nome = card.dataset.nome;
+            const preco = parseFloat(card.dataset.preco);
+            const estoque = parseInt(card.dataset.estoque);
 
-    const existente = carrinho.find(i => i.produto_id === id);
+            const existente = carrinho.find(i => i.produto_id === id);
 
-    if (!Number.isFinite(preco) || estoque <= 0) return;
+            if (!Number.isFinite(preco) || estoque <= 0) return;
 
-    if (existente) {
-        // Produto já está no carrinho — aumenta a quantidade se tiver estoque
-        if (existente.quantidade < existente.estoque_max) {
-            existente.quantidade = Math.min(existente.quantidade + 1, existente.estoque_max);
-        } else {
-            alert(`Estoque máximo atingido: ${existente.estoque_max} unidade(s).`);
-            return;
+            if (existente) {
+                // Produto já está no carrinho — aumenta a quantidade se tiver estoque
+                if (existente.quantidade < existente.estoque_max) {
+                    existente.quantidade = Math.min(existente.quantidade + 1, existente.estoque_max);
+                } else {
+                    alert(`Estoque máximo atingido: ${existente.estoque_max} unidade(s).`);
+                    return;
+                }
+            } else {
+                // Produto novo no carrinho
+                carrinho.push({ produto_id: id, nome, preco, quantidade: 1, estoque_max: estoque });
+            }
+
+            renderizarCarrinho();
         }
-    } else {
-        // Produto novo no carrinho
-        carrinho.push({ produto_id: id, nome, preco, quantidade: 1, estoque_max: estoque });
-    }
 
-    renderizarCarrinho();
-}
+        // ── Alterar quantidade ────────────────────────────────────────
 
-// ── Alterar quantidade ────────────────────────────────────────
+        function alterarQtd(produtoId, delta) {
+            const item = carrinho.find(i => i.produto_id === produtoId);
+            if (!item) return;
 
-function alterarQtd(produtoId, delta) {
-    const item = carrinho.find(i => i.produto_id === produtoId);
-    if (!item) return;
+            item.quantidade += delta;
 
-    item.quantidade += delta;
-
-    // Remove o item se a quantidade chegar a zero
-    if (item.quantidade <= 0) {
-        removerItem(produtoId);
-        return;
-    }
-
-    // Limita pelo estoque disponível
-    if (item.quantidade > item.estoque_max) {
-        item.quantidade = item.estoque_max;
-    }
-
-    renderizarCarrinho();
-}
-
-function removerItem(produtoId) {
-    carrinho = carrinho.filter(i => i.produto_id !== produtoId);
-    renderizarCarrinho();
-}
-
-// ── Atualizar cliente selecionado ─────────────────────────────
-
-function atualizarCliente(select) {
-    const opt = select.options[select.selectedIndex];
-    clienteAtual.id        = parseInt(opt.value);
-    clienteAtual.associado = opt.dataset.associado === 'true';
-
-    // Exibe ou esconde o badge de desconto
-    const badge = document.getElementById('badge-desconto');
-    badge.style.display = clienteAtual.associado ? 'inline-flex' : 'none';
-
-    // Atualiza os itens e os totais com o desconto do associado.
-    renderizarCarrinho();
-}
-
-document.querySelectorAll('[data-filtro-cliente]').forEach(botao => {
-    botao.addEventListener('click', () => {
-        const filtro = botao.dataset.filtroCliente;
-        const select = document.getElementById('select-cliente');
-
-        document.querySelectorAll('[data-filtro-cliente]').forEach(item => item.classList.remove('ativo'));
-        botao.classList.add('ativo');
-
-        Array.from(select.options).forEach(opcao => {
-            if (opcao.value === '0') {
-                opcao.hidden = false;
+            // Remove o item se a quantidade chegar a zero
+            if (item.quantidade <= 0) {
+                removerItem(produtoId);
                 return;
             }
-            const associado = opcao.dataset.associado === 'true';
-            opcao.hidden = filtro === 'associados' ? !associado : filtro === 'nao-associados' ? associado : false;
+
+            // Limita pelo estoque disponível
+            if (item.quantidade > item.estoque_max) {
+                item.quantidade = item.estoque_max;
+            }
+
+            renderizarCarrinho();
+        }
+
+        function removerItem(produtoId) {
+            carrinho = carrinho.filter(i => i.produto_id !== produtoId);
+            renderizarCarrinho();
+        }
+
+        // ── Atualizar cliente selecionado ─────────────────────────────
+
+        function atualizarCliente(select) {
+            const opt = select.options[select.selectedIndex];
+            clienteAtual.id = parseInt(opt.value);
+            clienteAtual.associado = opt.dataset.associado === 'true';
+
+            // Exibe ou esconde o badge de desconto
+            const badge = document.getElementById('badge-desconto');
+            badge.style.display = clienteAtual.associado ? 'inline-flex' : 'none';
+
+            // Atualiza os itens e os totais com o desconto do associado.
+            renderizarCarrinho();
+        }
+
+        document.querySelectorAll('[data-filtro-cliente]').forEach(botao => {
+            botao.addEventListener('click', () => {
+                const filtro = botao.dataset.filtroCliente;
+                const select = document.getElementById('select-cliente');
+
+                document.querySelectorAll('[data-filtro-cliente]').forEach(item => item.classList.remove('ativo'));
+                botao.classList.add('ativo');
+
+                Array.from(select.options).forEach(opcao => {
+                    if (opcao.value === '0') {
+                        opcao.hidden = false;
+                        return;
+                    }
+                    const associado = opcao.dataset.associado === 'true';
+                    opcao.hidden = filtro === 'associados' ? !associado : filtro === 'nao-associados' ? associado : false;
+                });
+
+                if (select.selectedOptions[0].hidden) {
+                    select.value = '0';
+                    atualizarCliente(select);
+                }
+            });
         });
 
-        if (select.selectedOptions[0].hidden) {
-            select.value = '0';
-            atualizarCliente(select);
-        }
-    });
-});
+        // ── Renderizar lista do carrinho ──────────────────────────────
 
-// ── Renderizar lista do carrinho ──────────────────────────────
+        function renderizarCarrinho() {
+            const lista = document.getElementById('lista-carrinho');
+            const vazio = document.getElementById('msg-vazio');
+            const totais = document.getElementById('totais');
+            const btnFinal = document.getElementById('btn-finalizar');
 
-function renderizarCarrinho() {
-    const lista    = document.getElementById('lista-carrinho');
-    const vazio    = document.getElementById('msg-vazio');
-    const totais   = document.getElementById('totais');
-    const btnFinal = document.getElementById('btn-finalizar');
+            if (carrinho.length === 0) {
+                lista.innerHTML = '';
+                lista.appendChild(vazio);
+                vazio.style.display = 'flex';
+                totais.style.display = 'none';
+                btnFinal.disabled = true;
+                return;
+            }
 
-    if (carrinho.length === 0) {
-        lista.innerHTML = '';
-        lista.appendChild(vazio);
-        vazio.style.display = 'flex';
-        totais.style.display = 'none';
-        btnFinal.disabled = true;
-        return;
-    }
+            vazio.style.display = 'none';
+            totais.style.display = 'block';
+            btnFinal.disabled = false;
 
-    vazio.style.display = 'none';
-    totais.style.display = 'block';
-    btnFinal.disabled = false;
+            lista.innerHTML = '';
 
-    lista.innerHTML = '';
-
-    carrinho.forEach(item => {
-        const subtotal = item.preco * item.quantidade;
-        const div = document.createElement('div');
-        div.className = 'item-carrinho';
-        div.innerHTML = `
+            carrinho.forEach(item => {
+                const subtotal = item.preco * item.quantidade;
+                const div = document.createElement('div');
+                div.className = 'item-carrinho';
+                div.innerHTML = `
             <div style="flex:1">
                 <div class="item-nome">${item.nome}</div>
                 <div class="item-preco-unit">
@@ -315,73 +301,74 @@ function renderizarCarrinho() {
                     onclick="removerItem(${item.produto_id})"
                     title="Remover">×</button>
         `;
-        lista.appendChild(div);
-    });
+                lista.appendChild(div);
+            });
 
-    renderizarTotais();
-}
+            renderizarTotais();
+        }
 
-// ── Calcular e exibir totais ──────────────────────────────────
+        // ── Calcular e exibir totais ──────────────────────────────────
 
-function renderizarTotais() {
-    const subtotal = carrinho.reduce(
-        (acc, i) => acc + i.preco * i.quantidade, 0
-    );
+        function renderizarTotais() {
+            const subtotal = carrinho.reduce(
+                (acc, i) => acc + i.preco * i.quantidade, 0
+            );
 
-    const descontoValor  = clienteAtual.associado
-        ? subtotal * (DESCONTO_PCT / 100)
-        : 0;
-    const total = subtotal - descontoValor;
+            const descontoValor = clienteAtual.associado
+                ? subtotal * (DESCONTO_PCT / 100)
+                : 0;
+            const total = subtotal - descontoValor;
 
-    const fmt = v => 'R$ ' + v.toFixed(2).replace('.', ',');
+            const fmt = v => 'R$ ' + v.toFixed(2).replace('.', ',');
 
-    document.getElementById('val-subtotal').textContent = fmt(subtotal);
-    document.getElementById('val-total').textContent    = fmt(total);
+            document.getElementById('val-subtotal').textContent = fmt(subtotal);
+            document.getElementById('val-total').textContent = fmt(total);
 
-    const linhaDesc  = document.getElementById('linha-desconto');
-    const labelDesc  = document.getElementById('label-desconto');
-    const valDesc    = document.getElementById('val-desconto');
+            const linhaDesc = document.getElementById('linha-desconto');
+            const labelDesc = document.getElementById('label-desconto');
+            const valDesc = document.getElementById('val-desconto');
 
-    if (clienteAtual.associado && descontoValor > 0) {
-        linhaDesc.style.display  = 'flex';
-        labelDesc.textContent    = `Desconto (${DESCONTO_PCT}%)`;
-        valDesc.textContent      = `− ${fmt(descontoValor)}`;
-    } else {
-        linhaDesc.style.display = 'none';
-    }
-}
+            if (clienteAtual.associado && descontoValor > 0) {
+                linhaDesc.style.display = 'flex';
+                labelDesc.textContent = `Desconto (${DESCONTO_PCT}%)`;
+                valDesc.textContent = `− ${fmt(descontoValor)}`;
+            } else {
+                linhaDesc.style.display = 'none';
+            }
+        }
 
-// ── Submeter a venda ──────────────────────────────────────────
+        // ── Submeter a venda ──────────────────────────────────────────
 
-function finalizarVenda() {
-    if (carrinho.length === 0) return;
-    if (!window.confirm('Confirmar finalização desta venda?')) return;
+        function finalizarVenda() {
+            if (carrinho.length === 0) return;
+            if (!window.confirm('Confirmar finalização desta venda?')) return;
 
-    // Serializa o carrinho para o campo oculto
-    document.getElementById('input-carrinho').value =
-        JSON.stringify(carrinho.map(i => ({
-            produto_id: i.produto_id,
-            nome:       i.nome,
-            preco:      i.preco,
-            quantidade: i.quantidade,
-        })));
+            // Serializa o carrinho para o campo oculto
+            document.getElementById('input-carrinho').value =
+                JSON.stringify(carrinho.map(i => ({
+                    produto_id: i.produto_id,
+                    nome: i.nome,
+                    preco: i.preco,
+                    quantidade: i.quantidade,
+                })));
 
-    document.getElementById('input-cliente-id').value = clienteAtual.id;
-    document.getElementById('input-obs').value =
-        document.getElementById('obs-input').value;
+            document.getElementById('input-cliente-id').value = clienteAtual.id;
+            document.getElementById('input-obs').value =
+                document.getElementById('obs-input').value;
 
-    document.getElementById('form-venda').submit();
-}
+            document.getElementById('form-venda').submit();
+        }
 
-// ── Filtro de busca de produtos ───────────────────────────────
+        // ── Filtro de busca de produtos ───────────────────────────────
 
-document.getElementById('busca-produto').addEventListener('input', function () {
-    const termo = this.value.toLowerCase().trim();
-    document.querySelectorAll('.produto-card').forEach(card => {
-        const nome = card.dataset.nomeLower || '';
-        card.style.display = nome.includes(termo) ? '' : 'none';
-    });
-});
-</script>
+        document.getElementById('busca-produto').addEventListener('input', function () {
+            const termo = this.value.toLowerCase().trim();
+            document.querySelectorAll('.produto-card').forEach(card => {
+                const nome = card.dataset.nomeLower || '';
+                card.style.display = nome.includes(termo) ? '' : 'none';
+            });
+        });
+    </script>
 </body>
+
 </html>

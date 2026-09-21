@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>Armário {{ armario.numero }} — AAPM SENAI</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% include "_aapm_styles.html" %}
 </head>
+
 <body>
     <!-- Feedback de ações -->
     {% if request.query_params.get('alugado') == 'ok' %}
-        <p style="color:green">Armário alugado com sucesso!</p>
+    <p style="color:green">Armário alugado com sucesso!</p>
     {% endif %}
     {% if request.query_params.get('liberado') == 'ok' %}
-        <p style="color:green">Armário liberado com sucesso!</p>
+    <p style="color:green">Armário liberado com sucesso!</p>
     {% endif %}
     {% if request.query_params.get('editado') == 'ok' %}
-        <p style="color:green">Dados atualizados com sucesso!</p>
+    <p style="color:green">Dados atualizados com sucesso!</p>
     {% endif %}
 
     <h1>Armário {{ armario.numero }}</h1>
@@ -29,11 +31,11 @@
             <td><strong>Status</strong></td>
             <td>
                 {% if armario.status.value == 'disponivel' %}
-                    <span style="color:green">● Disponível</span>
+                <span style="color:green">● Disponível</span>
                 {% elif armario.status.value == 'alugado' %}
-                    <span style="color:orange">● Alugado</span>
+                <span style="color:orange">● Alugado</span>
                 {% else %}
-                    <span style="color:gray">● Inativo</span>
+                <span style="color:gray">● Inativo</span>
                 {% endif %}
             </td>
         </tr>
@@ -67,30 +69,26 @@
     </table>
 
     {% if usuario.role == 'admin' %}
-        <br>
+    <br>
 
-        {% if armario.status.value == 'disponivel' %}
-            <a href="/armarios/{{ armario.id }}/alugar">Alugar</a> &nbsp;
-        {% endif %}
+    {% if armario.status.value == 'disponivel' %}
+    <a href="/armarios/{{ armario.id }}/alugar">Alugar</a> &nbsp;
+    {% endif %}
 
-        {% if armario.status.value == 'alugado' %}
-            <form action="/armarios/{{ armario.id }}/liberar"
-                  method="post"
-                  style="display:inline"
-                  onsubmit="return confirm('Liberar este armário?')">
-                <button type="submit">Liberar armário</button>
-            </form> &nbsp;
-        {% endif %}
+    {% if armario.status.value == 'alugado' %}
+    <form action="/armarios/{{ armario.id }}/liberar" method="post" style="display:inline"
+        onsubmit="return confirm('Liberar este armário?')">
+        <button type="submit">Liberar armário</button>
+    </form> &nbsp;
+    {% endif %}
 
-        <a href="/armarios/{{ armario.id }}/editar">Editar dados</a> &nbsp;
+    <a href="/armarios/{{ armario.id }}/editar">Editar dados</a> &nbsp;
 
-        <form action="/armarios/{{ armario.id }}/toggle-ativo"
-              method="post"
-              style="display:inline">
-            <button type="submit">
-                {{ "Desativar" if armario.ativo else "Reativar" }}
-            </button>
-        </form>
+    <form action="/armarios/{{ armario.id }}/toggle-ativo" method="post" style="display:inline">
+        <button type="submit">
+            {{ "Desativar" if armario.ativo else "Reativar" }}
+        </button>
+    </form>
     {% endif %}
 
     <br><br>
@@ -98,4 +96,5 @@
     <br><br>
     <a href="/armarios">← Voltar ao mapa</a>
 </body>
+
 </html>

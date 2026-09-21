@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <title>Movimentações — AAPM SENAI</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% include "_aapm_styles.html" %}
 </head>
+
 <body>
     <h1>Histórico de movimentações</h1>
 
@@ -15,20 +17,32 @@
         <select name="produto_id">
             <option value="0">Todos os produtos</option>
             {% for p in produtos %}
-                <option value="{{ p.id }}"
-                    {{ 'selected' if produto_id == p.id else '' }}>
-                    {{ p.nome }}
-                </option>
+            <option value="{{ p.id }}" {{ 'selected' if produto_id==p.id else '' }}>
+                {{ p.nome }}
+            </option>
             {% endfor %}
         </select>
-        <select name="ordenar_por"><option value="data">Data</option><option value="produto">Produto</option><option value="tipo">Tipo</option><option value="quantidade">Quantidade</option><option value="valor">Preço unitário</option></select><select name="direcao"><option value="asc">Crescente</option><option value="desc">Decrescente</option></select><select name="por_pagina"><option value="10">10 por página</option><option value="25">25 por página</option><option value="50">50 por página</option></select>
+        <select name="ordenar_por">
+            <option value="data">Data</option>
+            <option value="produto">Produto</option>
+            <option value="tipo">Tipo</option>
+            <option value="quantidade">Quantidade</option>
+            <option value="valor">Preço unitário</option>
+        </select><select name="direcao">
+            <option value="asc">Crescente</option>
+            <option value="desc">Decrescente</option>
+        </select><select name="por_pagina">
+            <option value="10">10 por página</option>
+            <option value="25">25 por página</option>
+            <option value="50">50 por página</option>
+        </select>
 
         <select name="tipo">
             <option value="">Todos os tipos</option>
-            <option value="entrada" {{ 'selected' if tipo == 'entrada' else '' }}>
+            <option value="entrada" {{ 'selected' if tipo=='entrada' else '' }}>
                 Entrada
             </option>
-            <option value="saida" {{ 'selected' if tipo == 'saida' else '' }}>
+            <option value="saida" {{ 'selected' if tipo=='saida' else '' }}>
                 Saída
             </option>
         </select>
@@ -36,7 +50,7 @@
         <button type="submit">Filtrar</button>
 
         {% if produto_id or tipo %}
-            <a href="/movimentacoes">Limpar</a>
+        <a href="/movimentacoes">Limpar</a>
         {% endif %}
     </form>
 
@@ -66,9 +80,9 @@
                 </td>
                 <td>
                     {% if m.tipo.value == 'entrada' %}
-                        <span style="color:green">▲ Entrada</span>
+                    <span style="color:green">▲ Entrada</span>
                     {% else %}
-                        <span style="color:red">▼ Saída</span>
+                    <span style="color:red">▼ Saída</span>
                     {% endif %}
                 </td>
                 <td>{{ m.quantidade }}</td>
@@ -93,4 +107,5 @@
 
     <p><a href="/">← Dashboard</a></p>
 </body>
+
 </html>

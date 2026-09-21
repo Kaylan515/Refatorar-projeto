@@ -37,15 +37,24 @@
         </select>
         {#
 
-        <select name="ordenar_por"><option value="nome" {{ 'selected' if ordenar_por == 'nome' else '' }}>Nome</option><option value="categoria" {{ 'selected' if ordenar_por == 'categoria' else '' }}>Categoria</option><option value="preco" {{ 'selected' if ordenar_por == 'preco' else '' }}>Preço</option><option value="estoque" {{ 'selected' if ordenar_por == 'estoque' else '' }}>Estoque</option></select>
-        <select name="direcao"><option value="asc" {{ 'selected' if direcao == 'asc' else '' }}>Crescente</option><option value="desc" {{ 'selected' if direcao == 'desc' else '' }}>Decrescente</option></select>
-        <select name="por_pagina">{% for tamanho in [10, 25, 50] %}<option value="{{ tamanho }}" {{ 'selected' if por_pagina == tamanho else '' }}>{{ tamanho }} por página</option>{% endfor %}</select>
+        <select name="ordenar_por">
+            <option value="nome" {{ 'selected' if ordenar_por=='nome' else '' }}>Nome</option>
+            <option value="categoria" {{ 'selected' if ordenar_por=='categoria' else '' }}>Categoria</option>
+            <option value="preco" {{ 'selected' if ordenar_por=='preco' else '' }}>Preço</option>
+            <option value="estoque" {{ 'selected' if ordenar_por=='estoque' else '' }}>Estoque</option>
+        </select>
+        <select name="direcao">
+            <option value="asc" {{ 'selected' if direcao=='asc' else '' }}>Crescente</option>
+            <option value="desc" {{ 'selected' if direcao=='desc' else '' }}>Decrescente</option>
+        </select>
+        <select name="por_pagina">{% for tamanho in [10, 25, 50] %}<option value="{{ tamanho }}" {{ 'selected' if
+                por_pagina==tamanho else '' }}>{{ tamanho }} por página</option>{% endfor %}</select>
 
         #}
         <select name="possui_variacao">
             <option value="">Todos os produtos</option>
-            <option value="sim" {{ 'selected' if possui_variacao == 'sim' else '' }}>Com variacao</option>
-            <option value="nao" {{ 'selected' if possui_variacao == 'nao' else '' }}>Sem variacao</option>
+            <option value="sim" {{ 'selected' if possui_variacao=='sim' else '' }}>Com variacao</option>
+            <option value="nao" {{ 'selected' if possui_variacao=='nao' else '' }}>Sem variacao</option>
         </select>
 
         <button type="submit">Filtrar</button>
