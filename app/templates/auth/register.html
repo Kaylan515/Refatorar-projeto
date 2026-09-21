@@ -1,27 +1,17 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Criar Conta — AAPM SENAI</title>
-    
-    <!-- Importação de Fontes e Ícones -->
+    <title>Registar — AAPM SENAI</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,400,1,0&display=swap" rel="stylesheet">
-    
-    <!-- Estilos Globais e do Registo -->
-    {% include "_aapm_styles.html" %}
     <link rel="stylesheet" href="/static/css/register.css">
 </head>
-
 <body>
-    <!-- Efeito de Spotlight do Mouse -->
     <div class="spotlight" id="spotlight"></div>
 
-    <div class="register-page-wrapper">
-        <!-- Cabeçalho Superior Flutuante -->
+    <div class="auth-page-wrapper">
         <header class="site-header">
             <div class="nav-brand">
                 <strong>SENAI</strong>
@@ -31,11 +21,10 @@
             <span class="brand-badge">AAPM • SENAI</span>
         </header>
 
-        <!-- Corpo Principal Centralizado (Sem cards excedentes) -->
-        <main class="register-content-center">
-            <div class="register-box">
-                <div class="register-titles">
-                    <span class="register-kicker">PLATAFORMA INTERNA</span>
+        <main class="auth-content-center">
+            <div class="auth-box">
+                <div class="auth-titles">
+                    <span class="auth-kicker">PLATAFORMA INTERNA</span>
                     <h1>Criar nova conta</h1>
                     <p>Insira os seus dados para aceder ao sistema de gestão.</p>
                 </div>
@@ -50,7 +39,7 @@
                     {% endif %}
                 {% endwith %}
 
-                <form method="POST" action="/auth/register" class="register-form">
+                <form method="POST" action="/auth/register" class="auth-form">
                     <div class="input-field-group">
                         <label for="nome">Nome Completo</label>
                         <input type="text" id="nome" name="nome" placeholder="Ex: João da Silva" required autocomplete="name">
@@ -66,16 +55,15 @@
                         <input type="password" id="senha" name="senha" placeholder="••••••••" required autocomplete="new-password">
                     </div>
 
-                    <button type="submit" class="btn-primary register-submit-btn">Finalizar Registo</button>
+                    <button type="submit" class="btn-primary">Finalizar Registo</button>
                 </form>
 
-                <div class="register-redirect">
+                <div class="auth-redirect">
                     <p>Já tem uma conta? <a href="/auth/login">Fazer login</a></p>
                 </div>
             </div>
         </main>
 
-        <!-- Rodapé Padrão -->
         <footer class="welcome-footer">
             <div class="footer-info">
                 <p><strong>Associação de Pais e Mestres</strong> • SENAI</p>
@@ -89,8 +77,6 @@
         </footer>
     </div>
 
-    <!-- Scripts -->
-    <script src="/static/js/ui.js" defer></script>
+    <script src="/static/js/register.js" defer></script>
 </body>
-
 </html>

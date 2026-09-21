@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ titulo }} — AAPM SENAI</title>
-    {% include "_aapm_styles.html" %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/erro.css">
 </head>
-
 <body>
     <div class="spotlight" id="spotlight"></div>
 
-    <div class="page-wrapper error-wrapper">
+    <div class="auth-page-wrapper">
         <header class="site-header">
             <div class="nav-brand">
                 <strong>SENAI</strong>
@@ -28,7 +27,6 @@
                 <h1>{{ titulo }}</h1>
                 <p>{{ mensagem }}</p>
             </div>
-
             <div class="button-group">
                 <a href="/" class="btn-primary">Voltar ao painel</a>
             </div>
@@ -47,8 +45,6 @@
         </footer>
     </div>
 
-    <script src="/static/js/ui.js" defer></script>
-    <script src="/static/js/welcome.js"></script>
+    <script src="/static/js/erro.js" defer></script>
 </body>
-
 </html>

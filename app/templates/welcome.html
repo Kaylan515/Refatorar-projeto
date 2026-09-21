@@ -1,105 +1,62 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bem-vindo — Estoque SENAI AAPM</title>
+    <title>Estoque — AAPM SENAI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/welcome.css">
 </head>
-
 <body>
-    <!-- Efeito de luz interativo do cursor -->
     <div class="spotlight" id="spotlight"></div>
 
-    <div class="page-wrapper">
-        <!-- Navegação Superior Flutuante -->
+    <main class="welcome-wrapper reveal-on-scroll">
         <header class="site-header">
             <div class="nav-brand">
+                <div class="brand-icon">S</div>
                 <strong>SENAI</strong>
                 <span class="divider">•</span>
-                <span>Educação profissional • Tecnologia</span>
+                <span>Educação profissional • Tecnologia • Inovação</span>
             </div>
             <span class="brand-badge">AAPM • SENAI</span>
         </header>
 
-        <!-- Seção Hero Principal (Solta na tela) -->
-        <main class="hero-section">
-            <div class="hero-copy">
-                <p class="eyebrow">ASSOCIAÇÃO DE PAIS E MESTRES</p>
-                <h1>Conhecimento que transforma o futuro da indústria.</h1>
-                <p>Uma experiência integrada e de alta performance para gerenciar produtos, vendas, estoque e serviços da comunidade escolar com eficiência moderna.</p>
-            </div>
-
-            <!-- Botões de Ação Principal -->
-            <div class="button-group">
-                <a href="/auth/login" class="btn-primary">Acessar Sistema</a>
-                <span class="btn-secondary">Acesso gerenciado pela administração</span>
-            </div>
-        </main>
-
-        <!-- Seção de Recursos (Grid Solto com Ícones Vetoriais SVG) -->
-        <section class="features-section">
-            <div class="section-title-wrapper">
-                <h2>Módulos do Sistema de Gestão</h2>
-                <p>Selecione o acesso integrado para gerenciar todos os recursos centralizados.</p>
-            </div>
-
-            <div class="access-features">
-                <div class="access-feature">
-                    <div class="feature-icon">
-                        <!-- Ícone SVG de Estoque / Caixa -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
-                    </div>
-                    <div class="feature-text">
-                        <h3>Estoque</h3>
-                        <small>Produtos, lotes e movimentações em tempo real</small>
-                    </div>
-                </div>
-
-                <div class="access-feature">
-                    <div class="feature-icon">
-                        <!-- Ícone SVG de Armários / Chave ou Prédio -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
-                    </div>
-                    <div class="feature-text">
-                        <h3>Armários</h3>
-                        <small>Disponibilidade, termos e locações ativas</small>
-                    </div>
-                </div>
-
-                <div class="access-feature">
-                    <div class="feature-icon">
-                        <!-- Ícone SVG de PDV / Cartão ou Vendas -->
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
-                    </div>
-                    <div class="feature-text">
-                        <h3>PDV & Vendas</h3>
-                        <small>Caixa rápido e histórico operacional completo</small>
-                    </div>
-                </div>
-            </div>
+        <section class="welcome-hero">
+            <p class="hero-eyebrow">ASSOCIAÇÃO DE PAIS E MESTRES</p>
+            <h1>Conhecimento que transforma o futuro da indústria.</h1>
+            <p class="hero-desc">Uma experiência integrada para gerenciar produtos, vendas, estoque e serviços da comunidade escolar.</p>
         </section>
 
-        <!-- Grid de Indicadores / Métricas SaaS -->
-        <section class="metrics-section">
-            <div class="saas-metrics-grid">
-                <div class="metric-card">
-                    <span class="metric-num">100%</span>
-                    <span class="metric-label">Controle Integrado</span>
+        <div class="access-features">
+            <div class="access-feature">
+                <div class="access-feature-title">
+                    Estoque
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                 </div>
-                <div class="metric-card">
-                    <span class="metric-num">Agilidade</span>
-                    <span class="metric-label">Operações Otimizadas</span>
-                </div>
-                <div class="metric-card">
-                    <span class="metric-num">Seguro</span>
-                    <span class="metric-label">Acesso Restrito & Auditado</span>
-                </div>
+                <small>Produtos e movimentações</small>
             </div>
-        </section>
+            <div class="access-feature">
+                <div class="access-feature-title">
+                    Armários
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                </div>
+                <small>Disponibilidade e locações</small>
+            </div>
+            <div class="access-feature">
+                <div class="access-feature-title">
+                    PDV
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                </div>
+                <small>Vendas e histórico operacional</small>
+            </div>
+        </div>
 
-        <!-- Footer Completo Solto -->
+        <div class="button-group">
+            <a href="/auth/login" class="btn-primary">Entrar no sistema</a>
+            <span class="btn-secondary-text">Acesso restrito à comunidade acadêmica</span>
+        </div>
+
         <footer class="welcome-footer">
             <div class="footer-info">
                 <p><strong>Associação de Pais e Mestres</strong> • SENAI</p>
@@ -111,9 +68,8 @@
                 <span>Termos de Uso</span>
             </div>
         </footer>
-    </div>
+    </main>
 
-    <script src="/static/js/welcome.js"></script>
+    <script src="/static/js/welcome.js" defer></script>
 </body>
-
 </html>
