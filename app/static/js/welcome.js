@@ -1,13 +1,24 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Efeito de Spotlight interativo seguindo o mouse
     const spotlight = document.getElementById('spotlight');
+    let mouseX = 0, mouseY = 0, currentX = 0, currentY = 0;
 
-    if (spotlight) {
-        window.addEventListener('mousemove', (e) => {
-            const x = e.clientX;
-            const y = e.clientY;
-            spotlight.style.left = `${x}px`;
-            spotlight.style.top = `${y}px`;
-        });
+    window.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    });
+
+    function renderSpotlight() {
+        currentX += (mouseX - currentX) * 0.1;
+        currentY += (mouseY - currentY) * 0.1;
+        if (spotlight) {
+            spotlight.style.transform = `translate(${currentX}px, ${currentY}px) translate(-50%, -50%)`;
+        }
+        requestAnimationFrame(renderSpotlight);
     }
+    renderSpotlight();
+
+    setTimeout(() => {
+        const wrapper = document.querySelector('.welcome-wrapper');
+        if (wrapper) wrapper.classList.add('revealed');
+    }, 100);
 });

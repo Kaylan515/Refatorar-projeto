@@ -1,37 +1,82 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
-    <title>Cadastro — Estoque</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {% include "_aapm_styles.html" %}
+    <title>Registar — AAPM SENAI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/register.css">
 </head>
-
 <body>
-    <h1>Criar conta</h1>
+    <div class="spotlight" id="spotlight"></div>
 
-    {% if erro %}
-    <p style="color: red;">{{ erro }}</p>
-    {% endif %}
+    <div class="auth-page-wrapper">
+        <header class="site-header">
+            <div class="nav-brand">
+                <strong>SENAI</strong>
+                <span class="divider">•</span>
+                <span>Educação profissional • Tecnologia</span>
+            </div>
+            <span class="brand-badge">AAPM • SENAI</span>
+        </header>
 
-    <form action="/auth/register" method="post">
-        <label>Nome:
-            <input type="text" name="nome" required>
-        </label>
-        <br>
-        <label>E-mail:
-            <input type="email" name="email" required>
-        </label>
-        <br>
-        <label>Senha:
-            <input type="password" name="senha" required minlength="4">
-        </label>
-        <br>
-        <button type="submit">Cadastrar</button>
-    </form>
+        <main class="auth-content-center">
+            <div class="auth-box">
+                <div class="auth-titles">
+                    <span class="auth-kicker">PLATAFORMA INTERNA</span>
+                    <h1>Criar nova conta</h1>
+                    <p>Insira os seus dados para aceder ao sistema de gestão.</p>
+                </div>
 
-    <p><a href="/auth/login">← Voltar ao login</a></p>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="alert-stack">
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }}">{{ message }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                <form method="POST" action="/auth/register" class="auth-form">
+                    <div class="input-field-group">
+                        <label for="nome">Nome Completo</label>
+                        <input type="text" id="nome" name="nome" placeholder="Ex: João da Silva" required autocomplete="name">
+                    </div>
+
+                    <div class="input-field-group">
+                        <label for="email">E-mail Institucional</label>
+                        <input type="email" id="email" name="email" placeholder="nome@senai.br" required autocomplete="email">
+                    </div>
+
+                    <div class="input-field-group">
+                        <label for="senha">Palavra-passe</label>
+                        <input type="password" id="senha" name="senha" placeholder="••••••••" required autocomplete="new-password">
+                    </div>
+
+                    <button type="submit" class="btn-primary">Finalizar Registo</button>
+                </form>
+
+                <div class="auth-redirect">
+                    <p>Já tem uma conta? <a href="/auth/login">Fazer login</a></p>
+                </div>
+            </div>
+        </main>
+
+        <footer class="welcome-footer">
+            <div class="footer-info">
+                <p><strong>Associação de Pais e Mestres</strong> • SENAI</p>
+                <p class="footer-sub">Plataforma interna de gestão acadêmica e operacional.</p>
+            </div>
+            <div class="footer-links">
+                <span>Suporte T.I.</span>
+                <span>•</span>
+                <span>Termos de Uso</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="/static/js/register.js" defer></script>
 </body>
-
 </html>

@@ -1,9 +1,6 @@
-/* ==========================================================================
-   1. VARIÁVEIS E CONFIGURAÇÕES GLOBAIS (Tema Escuro AAPM / SENAI)
-   ========================================================================== */
 :root {
     --bg-color: #0c0a09;
-    --card-bg: rgba(24, 20, 18, 0.5);
+    --card-bg: rgba(24, 20, 18, 0.6);
     --border-color: rgba(68, 54, 51, 0.4);
     --border-hover: rgba(217, 119, 6, 0.45);
     --text-main: #f5f5f4;
@@ -13,22 +10,17 @@
     --accent-glow: rgba(217, 119, 6, 0.15);
 }
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
     background-color: var(--bg-color);
     color: var(--text-main);
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
     position: relative;
 }
 
-/* Grade de fundo contínua (Estilo Webflow / SaaS) */
 body::before {
     content: '';
     position: fixed;
@@ -41,36 +33,35 @@ body::before {
     pointer-events: none;
 }
 
-/* Efeito de Spotlight do Mouse */
 .spotlight {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(217, 119, 6, 0.07) 0%, rgba(0,0,0,0) 70%);
+    top: 0; left: 0;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(217, 119, 6, 0.08) 0%, rgba(0,0,0,0) 70%);
     transform: translate(-50%, -50%);
     pointer-events: none;
     z-index: 1;
-    transition: width 0.3s, height 0.3s;
 }
 
-/* ==========================================================================
-   2. ESTRUTURA FLUIDA DA PÁGINA (Layout Aberto / Solto)
-   ========================================================================== */
-.page-wrapper {
+.welcome-wrapper {
     position: relative;
     z-index: 2;
     width: 100%;
     max-width: 1100px;
     margin: 0 auto;
-    padding: 2.5rem 2rem 4rem 2rem;
+    padding: 2.5rem 2rem 3.5rem 2rem;
     display: flex;
     flex-direction: column;
-    gap: 3.5rem;
+    gap: 3rem;
+    min-height: 100vh;
+    justify-content: space-between;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
 }
 
-/* Header Superior */
+.welcome-wrapper.revealed { opacity: 1; transform: translateY(0); }
+
 .site-header {
     display: flex;
     justify-content: space-between;
@@ -87,18 +78,22 @@ body::before {
     color: var(--text-muted);
 }
 
-.nav-brand strong {
-    color: var(--text-main);
-    letter-spacing: 1.2px;
-    font-size: 1.1rem;
-}
-
-.divider {
+.brand-icon {
+    width: 28px; height: 28px;
+    background: rgba(217, 119, 6, 0.15);
+    border: 1px solid rgba(217, 119, 6, 0.4);
     color: var(--primary-color);
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 0.9rem;
 }
 
+.nav-brand strong { color: var(--text-main); font-family: 'Space Grotesk', sans-serif; }
+.divider { color: var(--primary-color); }
 .brand-badge {
-    display: inline-block;
     padding: 0.3rem 0.85rem;
     background: rgba(217, 119, 6, 0.1);
     border: 1px solid rgba(217, 119, 6, 0.3);
@@ -109,276 +104,63 @@ body::before {
     letter-spacing: 0.8px;
 }
 
-/* ==========================================================================
-   3. HERO SECTION (Telas Soltas)
-   ========================================================================== */
-.hero-section {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    max-width: 800px;
-}
-
-.hero-copy {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.eyebrow {
+.welcome-hero { display: flex; flex-direction: column; gap: 1rem; max-width: 800px; }
+.hero-eyebrow {
     font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 2.5px;
-    color: var(--primary-color);
-    text-transform: uppercase;
-}
-
-.hero-copy h1 {
-    font-size: 3rem;
     font-weight: 800;
+    letter-spacing: 0.15em;
+    color: var(--primary-color);
+    font-family: 'Space Grotesk', sans-serif;
+}
+.welcome-hero h1 {
+    font-size: clamp(2.25rem, 4.5vw, 3.5rem);
+    font-weight: 700;
+    color: var(--text-main);
+    letter-spacing: -0.035em;
     line-height: 1.1;
-    color: var(--text-main);
-    letter-spacing: -1px;
 }
+.hero-desc { font-size: 1.15rem; color: var(--text-muted); line-height: 1.6; max-width: 650px; }
 
-.hero-copy p {
-    font-size: 1.15rem;
-    color: var(--text-muted);
-    line-height: 1.6;
-}
-
-/* ==========================================================================
-   4. SEÇÃO DE RECURSOS E MÓDULOS (Com SVGs Estilizados)
-   ========================================================================== */
-.features-section {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.section-title-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 0.4rem;
-}
-
-.section-title-wrapper h2 {
-    font-size: 1.75rem;
-    font-weight: 600;
-    color: var(--text-main);
-}
-
-.section-title-wrapper p {
-    font-size: 0.95rem;
-    color: var(--text-muted);
-}
-
-.access-features {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.25rem;
-}
-
+.access-features { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; }
 .access-feature {
     background: var(--card-bg);
     backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border-color);
+    border-radius: 1.25rem;
     padding: 1.5rem;
-    border-radius: 20px;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    gap: 0.4rem;
+    transition: border-color 0.25s, transform 0.2s;
 }
-
-.access-feature:hover {
-    border-color: var(--border-hover);
-    transform: translateY(-5px);
-    background: rgba(217, 119, 6, 0.05);
-    box-shadow: 0 15px 30px -10px rgba(217, 119, 6, 0.12);
+.access-feature:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+.access-feature-title {
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 600; color: var(--text-main);
 }
+.access-feature-title svg { color: var(--primary-color); }
+.access-feature small { color: var(--text-muted); font-size: 0.85rem; }
 
-.feature-icon {
-    width: 48px;
-    height: 48px;
-    background: rgba(217, 119, 6, 0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 12px;
-    border: 1px solid rgba(217, 119, 6, 0.25);
-    color: var(--primary-color);
-    transition: background 0.3s, color 0.3s;
-}
-
-.access-feature:hover .feature-icon {
-    background: var(--primary-color);
-    color: #ffffff;
-}
-
-.feature-text h3 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--text-main);
-    margin-bottom: 0.25rem;
-}
-
-.feature-text small {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    line-height: 1.4;
-}
-
-/* ==========================================================================
-   5. MÉTRICAS E BOTÕES
-   ========================================================================== */
-.metrics-section {
-    width: 100%;
-}
-
-.saas-metrics-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-    background: rgba(18, 14, 12, 0.6);
-    border: 1px solid var(--border-color);
-    padding: 1.75rem;
-    border-radius: 20px;
-}
-
-.metric-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 0.3rem;
-}
-
-.metric-num {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--primary-color);
-}
-
-.metric-label {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-}
-
-.button-group {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-}
-
+.button-group { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
 .btn-primary {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    background-color: var(--primary-color);
-    color: #ffffff;
-    padding: 0.9rem 2.5rem;
-    border-radius: 14px;
-    font-weight: 600;
-    font-size: 1rem;
-    text-decoration: none;
-    transition: all 0.25s ease;
-    box-shadow: 0 4px 20px rgba(217, 119, 6, 0.35);
+    display: inline-flex; justify-content: center; align-items: center;
+    background-color: var(--primary-color); color: #ffffff;
+    padding: 0.9rem 2.25rem; border-radius: 1rem; font-weight: 600; font-size: 1rem;
+    text-decoration: none; box-shadow: 0 4px 20px rgba(217, 119, 6, 0.35); transition: all 0.25s ease;
 }
+.btn-primary:hover { background-color: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 6px 25px rgba(217, 119, 6, 0.45); }
+.btn-secondary-text { color: var(--text-muted); font-size: 0.9rem; }
 
-.btn-primary:hover {
-    background-color: var(--primary-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(217, 119, 6, 0.45);
-}
-
-.btn-secondary {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-    padding: 0.8rem 1.2rem;
-    border-radius: 12px;
-    border: 1px dashed var(--border-color);
-    background: transparent;
-}
-
-/* ==========================================================================
-   6. RODAPÉ (FOOTER)
-   ========================================================================== */
 .welcome-footer {
-    border-top: 1px solid var(--border-color);
-    padding-top: 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.85rem;
-    color: var(--text-muted);
+    border-top: 1px solid var(--border-color); padding-top: 2rem;
+    display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--text-muted);
 }
-
-.footer-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-}
-
-.footer-info strong {
-    color: var(--text-main);
-}
-
-.footer-sub {
-    font-size: 0.75rem;
-}
-
-.footer-links {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-}
-
-.footer-links span {
-    cursor: pointer;
-    transition: color 0.2s;
-}
-
-.footer-links span:hover {
-    color: var(--primary-color);
-}
-
-/* ==========================================================================
-   7. RESPONSIVIDADE
-   ========================================================================== */
-@media (max-width: 900px) {
-    .access-features,
-    .saas-metrics-grid {
-        grid-template-columns: 1fr;
-    }
-}
+.footer-info { display: flex; flex-direction: column; gap: 0.2rem; }
+.footer-info strong { color: var(--text-main); }
+.footer-sub { font-size: 0.75rem; }
+.footer-links { display: flex; gap: 1rem; align-items: center; }
 
 @media (max-width: 768px) {
-    .page-wrapper {
-        padding: 1.5rem 1rem;
-        gap: 2.5rem;
-    }
-
-    .hero-copy h1 {
-        font-size: 2.2rem;
-    }
-
-    .button-group {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .btn-secondary {
-        text-align: center;
-    }
-
-    .welcome-footer {
-        flex-direction: column;
-        gap: 1.25rem;
-        text-align: center;
-    }
+    .welcome-wrapper { padding: 1.5rem; gap: 2rem; }
+    .welcome-footer { flex-direction: column; gap: 1rem; align-items: flex-start; }
 }
