@@ -146,7 +146,7 @@
                             {% if a.status.value == 'disponivel' %}
                             <a href="/armarios/{{ a.id }}/alugar" class="btn-card-action">Alugar</a>
                             {% elif a.status.value == 'alugado' %}
-                            <form action="/armarios/{{ a.id }}/liberar" method="post" onsubmit="return confirm('Liberar armário {{ a.numero }}?')">
+                            <form action="/armarios/{{ a.id }}/liberar" method="post" onsubmit="return confirm('Confirma a liberação do armário {{ a.numero }} no sistema AAPM SENAI?')">
                                 <button type="submit" class="btn-card-action btn-danger-soft">Liberar</button>
                             </form>
                             {% endif %}

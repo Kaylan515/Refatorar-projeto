@@ -93,7 +93,7 @@
                         {% endif %}
 
                         {% if armario.status.value == 'alugado' %}
-                        <form action="/armarios/{{ armario.id }}/liberar" method="post" onsubmit="return confirm('Tem certeza que deseja liberar este armário?')">
+                        <form action="/armarios/{{ armario.id }}/liberar" method="post" onsubmit="return confirm('Confirma a liberação do armário {{ armario.numero }} no sistema AAPM SENAI?')">
                             <button type="submit" class="btn btn-danger">Liberar Armário</button>
                         </form>
                         {% endif %}

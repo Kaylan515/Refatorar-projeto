@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const qtdProdutos = linha.querySelector('.badge.produtos-count').textContent.trim();
 
             if (parseInt(qtdProdutos) > 0) {
-                const confirmar = confirm(`Di katigori "${nomeCategoria}" gɛt ${qtdProdutos} prodɔt(s) we de wok. Yu sure se yu want fɔ desativam?`);
+                const confirmar = confirm(`A categoria "${nomeCategoria}" está vinculada a ${qtdProdutos} produto(s). Confirma a desativação desta categoria no sistema AAPM SENAI?`);
                 if (!confirmar) {
                     e.preventDefault();
                 }
