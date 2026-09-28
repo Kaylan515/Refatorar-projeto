@@ -1,99 +1,129 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
     <meta charset="UTF-8">
-    <title>Armário {{ armario.numero }} — AAPM SENAI</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Armário {{ armario.numero }} — AAPM SENAI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/armarios/detalhe.css">
 </head>
-
 <body>
-    <!-- Feedback de ações -->
-    {% if request.query_params.get('alugado') == 'ok' %}
-    <p style="color:green">Armário alugado com sucesso!</p>
-    {% endif %}
-    {% if request.query_params.get('liberado') == 'ok' %}
-    <p style="color:green">Armário liberado com sucesso!</p>
-    {% endif %}
-    {% if request.query_params.get('editado') == 'ok' %}
-    <p style="color:green">Dados atualizados com sucesso!</p>
-    {% endif %}
+    <div class="spotlight" id="spotlight"></div>
 
-    <h1>Armário {{ armario.numero }}</h1>
+    <div class="page-wrapper">
+        <header class="site-header">
+            <div class="nav-brand">
+                <strong>SENAI</strong>
+                <span class="divider">•</span>
+                <span>Gestão de Armários</span>
+            </div>
+            <span class="brand-badge">AAPM • SENAI</span>
+        </header>
 
-    <table border="1" cellpadding="8">
-        <tr>
-            <td><strong>Localização</strong></td>
-            <td>{{ armario.localizacao or "—" }}</td>
-        </tr>
-        <tr>
-            <td><strong>Status</strong></td>
-            <td>
-                {% if armario.status.value == 'disponivel' %}
-                <span style="color:green">● Disponível</span>
-                {% elif armario.status.value == 'alugado' %}
-                <span style="color:orange">● Alugado</span>
-                {% else %}
-                <span style="color:gray">● Inativo</span>
+        <main class="content-container">
+            <!-- Feedback de ações -->
+            {% if request.query_params.get('alugado') == 'ok' %}
+            <div class="alert alert-success">Armário alugado com sucesso!</div>
+            {% endif %}
+            {% if request.query_params.get('liberado') == 'ok' %}
+            <div class="alert alert-success">Armário liberado com sucesso!</div>
+            {% endif %}
+            {% if request.query_params.get('editado') == 'ok' %}
+            <div class="alert alert-success">Dados atualizados com sucesso!</div>
+            {% endif %}
+
+            <div class="detail-card">
+                <div class="card-header-main">
+                    <div>
+                        <span class="card-kicker">DETALHES DO RECURSO</span>
+                        <h1>Armário {{ armario.numero }}</h1>
+                    </div>
+                    <div>
+                        {% if armario.status.value == 'disponivel' %}
+                        <span class="badge badge-success">● Disponível</span>
+                        {% elif armario.status.value == 'alugado' %}
+                        <span class="badge badge-warning">● Alugado</span>
+                        {% else %}
+                        <span class="badge badge-neutral">● Inativo</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Localização</span>
+                        <span class="info-value">{{ armario.localizacao or "—" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Cadastrado em</span>
+                        <span class="info-value">{{ armario.criado_em.strftime('%d/%m/%Y') }}</span>
+                    </div>
+
+                    {% if armario.status.value == 'alugado' %}
+                    <div class="info-item">
+                        <span class="info-label">Locatário</span>
+                        <span class="info-value">{{ armario.locatario_nome }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Semestre</span>
+                        <span class="info-value">{{ armario.semestre }}</span>
+                    </div>
+                    <div class="info-item full-width">
+                        <span class="info-label">Alugado em</span>
+                        <span class="info-value">{{ armario.alugado_em.strftime('%d/%m/%Y %H:%M') }}</span>
+                    </div>
+                    {% endif %}
+
+                    {% if armario.observacao %}
+                    <div class="info-item full-width">
+                        <span class="info-label">Observação</span>
+                        <span class="info-value">{{ armario.observacao }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Ações de Administrador -->
+                {% if usuario.role == 'admin' %}
+                <div class="admin-actions">
+                    <h3>Painel Administrativo</h3>
+                    <div class="actions-buttons">
+                        {% if armario.status.value == 'disponivel' %}
+                        <a href="/armarios/{{ armario.id }}/alugar" class="btn btn-primary">Alugar Armário</a>
+                        {% endif %}
+
+                        {% if armario.status.value == 'alugado' %}
+                        <form action="/armarios/{{ armario.id }}/liberar" method="post" onsubmit="return confirm('Tem certeza que deseja liberar este armário?')">
+                            <button type="submit" class="btn btn-danger">Liberar Armário</button>
+                        </form>
+                        {% endif %}
+
+                        <a href="/armarios/{{ armario.id }}/editar" class="btn btn-secondary">Editar Dados</a>
+
+                        <form action="/armarios/{{ armario.id }}/toggle-ativo" method="post">
+                            <button type="submit" class="btn btn-outline">
+                                {{ "Desativar" if armario.ativo else "Reativar" }}
+                            </button>
+                        </form>
+                    </div>
+                </div>
                 {% endif %}
-            </td>
-        </tr>
 
-        {% if armario.status.value == 'alugado' %}
-        <tr>
-            <td><strong>Locatário</strong></td>
-            <td>{{ armario.locatario_nome }}</td>
-        </tr>
-        <tr>
-            <td><strong>Semestre</strong></td>
-            <td>{{ armario.semestre }}</td>
-        </tr>
-        <tr>
-            <td><strong>Alugado em</strong></td>
-            <td>{{ armario.alugado_em.strftime('%d/%m/%Y %H:%M') }}</td>
-        </tr>
-        {% endif %}
+                <div class="card-footer-actions">
+                    <a href="/armarios/{{ armario.id }}/historico" class="link-action">Ver histórico de reservas →</a>
+                    <a href="/armarios" class="link-back">← Voltar ao mapa</a>
+                </div>
+            </div>
+        </main>
 
-        {% if armario.observacao %}
-        <tr>
-            <td><strong>Observação</strong></td>
-            <td>{{ armario.observacao }}</td>
-        </tr>
-        {% endif %}
+        <footer class="site-footer">
+            <div class="footer-info">
+                <p><strong>Associação de Pais e Mestres</strong> • SENAI</p>
+                <p class="footer-sub">Plataforma interna de gestão acadêmica e operacional.</p>
+            </div>
+        </footer>
+    </div>
 
-        <tr>
-            <td><strong>Cadastrado em</strong></td>
-            <td>{{ armario.criado_em.strftime('%d/%m/%Y') }}</td>
-        </tr>
-    </table>
-
-    {% if usuario.role == 'admin' %}
-    <br>
-
-    {% if armario.status.value == 'disponivel' %}
-    <a href="/armarios/{{ armario.id }}/alugar">Alugar</a> &nbsp;
-    {% endif %}
-
-    {% if armario.status.value == 'alugado' %}
-    <form action="/armarios/{{ armario.id }}/liberar" method="post" style="display:inline"
-        onsubmit="return confirm('Liberar este armário?')">
-        <button type="submit">Liberar armário</button>
-    </form> &nbsp;
-    {% endif %}
-
-    <a href="/armarios/{{ armario.id }}/editar">Editar dados</a> &nbsp;
-
-    <form action="/armarios/{{ armario.id }}/toggle-ativo" method="post" style="display:inline">
-        <button type="submit">
-            {{ "Desativar" if armario.ativo else "Reativar" }}
-        </button>
-    </form>
-    {% endif %}
-
-    <br><br>
-    <a href="/armarios/{{ armario.id }}/historico">Ver histórico de reservas</a>
-    <br><br>
-    <a href="/armarios">← Voltar ao mapa</a>
+    <script src="/static/js/armarios/detalhe.js" defer></script>
 </body>
-
 </html>
