@@ -5,6 +5,7 @@
 # Qualquer logado: visualiza o mapa de disponibilidade.
 # ============================================================
 
+import math
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -12,7 +13,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models.armario import Armario, StatusArmario
+from app.models.armario import Armario, ReservaArmario, StatusArmario
 from app.auth import get_usuario_logado, get_admin
 
 router = APIRouter(prefix="/armarios", tags=["Armários"])
@@ -29,6 +30,8 @@ def listar_armarios(
     request: Request,
     status: str = "",           # filtra por status
     localizacao: str = "",      # filtra por localização
+    busca: str = "",
+    semestre: str = "",
     db: Session = Depends(get_db),
     usuario = Depends(get_usuario_logado)
 ):
@@ -43,6 +46,11 @@ def listar_armarios(
 
     if localizacao:
         query = query.filter(Armario.localizacao.ilike(f"%{localizacao}%"))
+    if busca:
+        termo = f"%{busca}%"
+        query = query.filter((Armario.numero.ilike(termo)) | (Armario.locatario_nome.ilike(termo)))
+    if semestre:
+        query = query.filter(Armario.semestre == semestre)
 
     armarios = query.order_by(Armario.numero).all()
 
@@ -69,12 +77,33 @@ def listar_armarios(
             "status":       status,
             "localizacao":  localizacao,
             "localizacoes": localizacoes,
+            "busca": busca,
+            "semestre": semestre,
+            "semestres": sorted(set(a.semestre for a in todos if a.semestre)),
             "StatusArmario": StatusArmario,
         }
     )
 
 
 # ============================================================
+# HISTÓRICO GERAL DE RESERVAS
+# ============================================================
+@router.get("/historico")
+def listar_historico_reservas(request: Request, busca: str = "", semestre: str = "", pagina: int = 1, db: Session = Depends(get_db), usuario=Depends(get_usuario_logado)):
+    query = db.query(ReservaArmario).join(Armario)
+    if busca:
+        termo = f"%{busca}%"
+        query = query.filter((ReservaArmario.locatario_nome.ilike(termo)) | (Armario.numero.ilike(termo)))
+    if semestre:
+        query = query.filter(ReservaArmario.semestre == semestre)
+    total_registros, por_pagina = query.count(), 10
+    total_paginas = max(math.ceil(total_registros / por_pagina), 1)
+    pagina = min(max(pagina, 1), total_paginas)
+    reservas = query.order_by(ReservaArmario.iniciado_em.desc()).offset((pagina - 1) * por_pagina).limit(por_pagina).all()
+    semestres = [item[0] for item in db.query(ReservaArmario.semestre).distinct().order_by(ReservaArmario.semestre).all()]
+    return templates.TemplateResponse(request, "armarios/historico_geral.html", {"request": request, "usuario": usuario, "reservas": reservas, "busca": busca, "semestre": semestre, "semestres": semestres, "pagina": pagina, "total_paginas": total_paginas, "total_registros": total_registros})
+
+
 # CADASTRO DE ARMÁRIO — somente admin
 # ============================================================
 
@@ -289,6 +318,13 @@ def alugar(
     armario.observacao     = observacao.strip() or armario.observacao
     armario.alugado_em     = datetime.now(timezone.utc)
 
+    db.add(ReservaArmario(
+        armario_id=armario.id,
+        locatario_nome=locatario_nome.strip(),
+        semestre=semestre.strip(),
+        observacao=observacao.strip() or None,
+    ))
+
     db.commit()
 
     return RedirectResponse(
@@ -317,6 +353,12 @@ def liberar(
     if not armario:
         return RedirectResponse(url="/armarios", status_code=302)
 
+    reserva_atual = (db.query(ReservaArmario)
+        .filter(ReservaArmario.armario_id == armario_id, ReservaArmario.encerrado_em.is_(None))
+        .order_by(ReservaArmario.iniciado_em.desc()).first())
+    if reserva_atual:
+        reserva_atual.encerrado_em = datetime.now(timezone.utc)
+
     armario.status         = StatusArmario.DISPONIVEL
     armario.locatario_nome = None
     armario.semestre       = None
@@ -328,6 +370,15 @@ def liberar(
         url=f"/armarios/{armario_id}?liberado=ok",
         status_code=302
     )
+
+
+@router.get("/{armario_id}/historico")
+def historico_reservas(armario_id: int, request: Request, db: Session = Depends(get_db), usuario=Depends(get_usuario_logado)):
+    armario = db.query(Armario).filter(Armario.id == armario_id).first()
+    if not armario:
+        return RedirectResponse(url="/armarios", status_code=302)
+    reservas = db.query(ReservaArmario).filter(ReservaArmario.armario_id == armario_id).order_by(ReservaArmario.iniciado_em.desc()).all()
+    return templates.TemplateResponse(request, "armarios/historico.html", {"request": request, "usuario": usuario, "armario": armario, "reservas": reservas})
 
 
 # ============================================================

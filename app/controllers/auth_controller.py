@@ -51,6 +51,9 @@ def registrar(
     O "..." significa que o campo é obrigatório.
     """
 
+    # O cadastro de contas é centralizado no módulo administrativo.
+    return RedirectResponse(url="/auth/login?mensagem=cadastro_restrito", status_code=303)
+
     # Verifica se o email já está cadastrado
     usuario_existente = db.query(Usuario).filter(
         Usuario.email == email
