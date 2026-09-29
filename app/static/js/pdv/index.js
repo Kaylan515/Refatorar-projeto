@@ -146,7 +146,7 @@ function renderizarTotais() {
 // ── Submeter a venda ──────────────────────────────────────────
 function finalizarVenda() {
     if (carrinho.length === 0) return;
-    if (!window.confirm('Confirmar finalização desta venda?')) return;
+    if (!window.confirm('Confirma o fechamento desta venda no sistema AAPM SENAI?')) return;
 
     document.getElementById('input-carrinho').value = JSON.stringify(carrinho.map(i => ({
         produto_id: i.produto_id,
